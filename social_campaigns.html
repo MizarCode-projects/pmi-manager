@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione Campagne Social - PMI Contatti Manager</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --info-color: #0dcaf0;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --body-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+        }
+        
+        .dark-mode {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --info-color: #0dcaf0;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --light-color: #343a40;
+            --dark-color: #f8f9fa;
+            --body-bg: #212529;
+            --card-bg: #343a40;
+            --text-color: #f8f9fa;
+            --border-color: #495057;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .card {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        
+        .table {
+            color: var(--text-color);
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-active { background-color: #d1e7dd; color: #0f5132; }
+        .status-paused { background-color: #fff3cd; color: #664d03; }
+        .status-completed { background-color: #cff4fc; color: #055160; }
+        .status-scheduled { background-color: #e2e3e5; color: #41464b; }
+        
+        .chart-container {
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid mt-4">
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <h1 class="text-center">PMI Contatti Manager</h1>
+                <p class="lead text-center">Gestione Campagne Social</p>
+                <div class="d-flex justify-content-center gap-3 mb-3">
+                    <a href="index.html" class="btn btn-primary"><i class="fas fa-home me-1"></i> Home</a>
+                    <a href="scraping.html" class="btn btn-info"><i class="fas fa-search me-1"></i> Scraping</a>
+                    <a href="social_campaigns.html" class="btn btn-success active"><i class="fas fa-bullhorn me-1"></i> Campagne</a>
+                    <a href="social_dashboard.html" class="btn btn-warning"><i class="fas fa-chart-line me-1"></i> Dashboard</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Filtri Campagne -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0"><i class="fas fa-filter me-2"></i>Filtri Campagne</h5>
+                        <button class="btn btn-sm btn-outline-secondary" id="toggle-filters-btn">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div class="card-body" id="filters-container">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="filter-platform" class="form-label">Piattaforma</label>
+                                <select id="filter-platform" class="form-select">
+                                    <option value="">Tutte le piattaforme</option>
+                                    <option value="Facebook">Facebook</option>
+                                    <option value="Instagram">Instagram</option>
+                                    <option value="LinkedIn">LinkedIn</option>
+                                    <option value="Twitter">Twitter</option>
+                                    <option value="Google Ads">Google Ads</option>
+                                    <option value="YouTube">YouTube</option>
+                                    <option value="TikTok">TikTok</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="filter-status" class="form-label">Stato</label>
+                                <select id="filter-status" class="form-select">
+                                    <option value="">Tutti gli stati</option>
+                                    <option value="active">Attiva</option>
+                                    <option value="paused">In pausa</option>
+                                    <option value="completed">Completata</option>
+                                    <option value="scheduled">Programmata</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="filter-objective" class="form-label">Obiettivo</label>
+                                <select id="filter-objective" class="form-select">
+                                    <option value="">Tutti gli obiettivi</option>
+                                    <option value="Awareness">Awareness</option>
+                                    <option value="Consideration">Consideration</option>
+                                    <option value="Conversion">Conversion</option>
+                                    <option value="Retention">Retention</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="filter-date-range" class="form-label">Periodo</label>
+                                <select id="filter-date-range" class="form-select">
+                                    <option value="all">Tutto il periodo</option>
+                                    <option value="last7">Ultimi 7 giorni</option>
+                                    <option value="last30">Ultimi 30 giorni</option>
+                                    <option value="last90">Ultimi 90 giorni</option>
+                                    <option value="thisMonth">Questo mese</option>
+                                    <option value="lastMonth">Mese scorso</option>
+                                    <option value="thisYear">Quest'anno</option>
+                                    <option value="custom">Personalizzato</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row" id="custom-date-range" style="display: none;">
+                            <div class="col-md-6 mb-3">
+                                <label for="filter-date-from" class="form-label">Data inizio</label>
+                                <input type="date" id="filter-date-from" class="form-control">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="filter-date-to" class="form-label">Data fine</label>
+                                <input type="date" id="filter-date-to" class="form-control">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <button id="apply-filters-btn" class="btn btn-primary float-end">
+                                    <i class="fas fa-filter me-1"></i> Applica Filtri
+                                </button>
+                                <button id="reset-filters-btn" class="btn btn-outline-secondary float-end me-2">
+                                    <i class="fas fa-undo me-1"></i> Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tabella Campagne -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0"><i class="fas fa-bullhorn me-2"></i>Campagne Social</h5>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#socialCampaignModal">
+                            <i class="fas fa-plus me-1"></i> Nuova Campagna
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="social-campaigns-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Piattaforma</th>
+                                        <th>Obiettivo</th>
+                                        <th>Budget</th>
+                                        <th>Data Inizio</th>
+                                        <th>Data Fine</th>
+                                        <th>Stato</th>
+                                        <th>Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- I dati verranno caricati dinamicamente -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Metriche di Performance -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0"><i class="fas fa-chart-line me-2"></i>Metriche di Performance</h5>
+                        <a href="social_dashboard.html" class="btn btn-sm btn-warning"><i class="fas fa-chart-bar me-1"></i> Vai alla Dashboard</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 col-sm-6 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h6 id="metric-impressions" class="card-title"><i class="fas fa-eye me-1"></i> Impressions</h6>
+                                        <h3 class="text-primary" id="total-impressions">0</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h6 id="metric-clicks" class="card-title"><i class="fas fa-mouse-pointer me-1"></i> Clicks</h6>
+                                        <h3 class="text-primary" id="total-clicks">0</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h6 id="metric-ctr" class="card-title"><i class="fas fa-percentage me-1"></i> CTR</h6>
+                                        <h3 class="text-primary" id="avg-ctr">0%</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h6 id="metric-cpc" class="card-title"><i class="fas fa-euro-sign me-1"></i> CPC</h6>
+                                        <h3 class="text-primary" id="avg-cpc">€0.00</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-6 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h6 id="metric-conversions" class="card-title"><i class="fas fa-check-circle me-1"></i> Conversions</h6>
+                                        <h3 class="text-success" id="total-conversions">0</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h6 id="metric-cac" class="card-title"><i class="fas fa-user-plus me-1"></i> CAC</h6>
+                                        <h3 class="text-success" id="avg-cac">€0.00</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h6 id="metric-roas" class="card-title"><i class="fas fa-exchange-alt me-1"></i> ROAS</h6>
+                                        <h3 class="text-success" id="avg-roas">0x</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h6 id="metric-cpm" class="card-title"><i class="fas fa-ad me-1"></i> CPM</h6>
+                                        <h3 class="text-success" id="avg-cpm">€0.00</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal Nuova Campagna -->
+        <div class="modal fade" id="socialCampaignModal" tabindex="-1" aria-labelledby="socialCampaignModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="socialCampaignModalLabel">Nuova Campagna Social</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="social-campaign-form">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="campaign-name" class="form-label">Nome Campagna</label>
+                                        <input type="text" class="form-control" id="campaign-name" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="campaign-platform" class="form-label">Piattaforma</label>
+                                        <select class="form-select" id="campaign-platform" required>
+                                            <option value="" selected disabled>Seleziona piattaforma</option>
+                                            <option value="Facebook">Facebook</option>
+                                            <option value="Instagram">Instagram</option>
+                                            <option value="LinkedIn">LinkedIn</option>
+                                            <option value="TikTok">TikTok</option>
+                                            <option value="Google Ads">Google Ads</option>
+                                            <option value="YouTube">YouTube</option>
+                                            <option value="Twitter">Twitter</option>
+                                            <option value="Pinterest">Pinterest</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="campaign-objective" class="form-label">Obiettivo <i class="fas fa-info-circle text-info" data-bs-toggle="tooltip" title="L'obiettivo principale della campagna (es. Awareness, Conversion, etc.)"></i></label>
+                                        <select class="form-select" id="campaign-objective" required>
+                                            <option value="" selected disabled>Seleziona obiettivo</option>
+                                            <option value="Awareness">Awareness</option>
+                                            <option value="Consideration">Consideration</option>
+                                            <option value="Lead Generation">Lead Generation</option>
+                                            <option value="Conversion">Conversion</option>
+                                            <option value="Engagement">Engagement</option>
+                                            <option value="Traffic">Traffic</option>
+                                            <option value="App Install">App Install</option>
+                                            <option value="Brand Awareness">Brand Awareness</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="campaign-budget" class="form-label">Budget (€)</label>
+                                        <input type="number" class="form-control" id="campaign-budget" min="1" step="0.01" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="campaign-start-date" class="form-label">Data Inizio</label>
+                                        <input type="date" class="form-control" id="campaign-start-date" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="campaign-end-date" class="form-label">Data Fine</label>
+                                        <input type="date" class="form-control" id="campaign-end-date" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="campaign-target-audience" class="form-label">Target Audience <i class="fas fa-info-circle text-info" data-bs-toggle="tooltip" title="Il pubblico target della campagna (es. giovani 18-24, professionisti, etc.)"></i></label>
+                                        <input type="text" class="form-control" id="campaign-target-audience">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="campaign-description" class="form-label">Descrizione</label>
+                                        <textarea class="form-control" id="campaign-description" rows="3"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                        <button type="button" class="btn btn-primary" id="save-campaign-btn">Salva Campagna</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal Dettagli Campagna -->
+        <div class="modal fade" id="campaignDetailsModal" tabindex="-1" aria-labelledby="campaignDetailsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="campaignDetailsModalLabel">Dettagli Campagna</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="campaign-details-container">
+                        <!-- I dettagli verranno aggiunti dinamicamente -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Notification Container -->
+        <div id="notification-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+        
+        <!-- Bootstrap JS Bundle with Popper -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+        
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        
+        <!-- DataTables JS -->
+        <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+        
+        <!-- Chart.js -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        
+        <!-- Utility Functions -->
+        <script src="js/utils.js"></script>
+        
+        <!-- Social Campaigns Scripts -->
+        <script src="js/social_campaigns.js"></script>
+        <script src="js/social_campaigns_table.js"></script>
+        
+        <script>
+            // Funzione per mostrare notifiche
+            function showNotification(message, type = 'info') {
+                const container = document.getElementById('notification-container');
+                
+                const notification = document.createElement('div');
+                notification.className = `alert alert-${type} alert-dismissible fade show`;
+                notification.innerHTML = `
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                
+                container.appendChild(notification);
+                
+                // Rimuovi la notifica dopo 5 secondi
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        container.removeChild(notification);
+                    }, 500);
+                }, 5000);
+            }
+            
+            // Inizializza la pagina quando il documento è pronto
+            document.addEventListener('DOMContentLoaded', function() {
+                // Inizializza i tooltip di Bootstrap
+                initTooltips();
+                
+                // Aggiungi tooltip per tutte le sigle tecniche
+                addMetricsTooltips();
+                
+                // Imposta la data di oggi nel form
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('campaign-start-date').value = today;
+                
+                // Imposta la data di fine a un mese dopo
+                const nextMonth = new Date();
+                nextMonth.setMonth(nextMonth.getMonth() + 1);
+                document.getElementById('campaign-end-date').value = nextMonth.toISOString().split('T')[0];
+                
+                // Gestione del salvataggio della campagna
+                document.getElementById('save-campaign-btn').addEventListener('click', function() {
+                    const form = document.getElementById('social-campaign-form');
+                    
+                    // Verifica che il form sia valido
+                    if (!form.checkValidity()) {
+                        form.reportValidity();
+                        return;
+                    }
+                    
+                    // Raccogli i dati dal form
+                    const name = document.getElementById('campaign-name').value;
+                    const platform = document.getElementById('campaign-platform').value;
+                    const objective = document.getElementById('campaign-objective').value;
+                    const budget = parseFloat(document.getElementById('campaign-budget').value);
+                    const startDate = document.getElementById('campaign-start-date').value;
+                    const endDate = document.getElementById('campaign-end-date').value;
+                    const targetAudience = document.getElementById('campaign-target-audience').value;
+                    const description = document.getElementById('campaign-description').value;
+                    
+                    // Crea l'oggetto campagna
+                    const campaign = {
+                        name,
+                        platform,
+                        objective,
+                        budget,
+                        startDate,
+                        endDate,
+                        targetAudience,
+                        description,
+                        status: 'active', // Stato predefinito
+                        createdAt: new Date().toISOString()
+                    };
+                    
+                    // Aggiungi la campagna all'array e salva
+                    addSocialCampaign(campaign);
+                    
+                    // Chiudi il modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('socialCampaignModal'));
+                    modal.hide();
+                    
+                    // Reset del form
+                    form.reset();
+                    document.getElementById('campaign-start-date').value = today;
+                    document.getElementById('campaign-end-date').value = nextMonth.toISOString().split('T')[0];
+                    
+                    // Mostra un messaggio di successo
+                    showNotification('Campagna creata con successo!', 'success');
+                });
+                
+                // Gestione del toggle dei filtri
+                document.getElementById('toggle-filters-btn').addEventListener('click', function() {
+                    const filtersContainer = document.getElementById('filters-container');
+                    const icon = this.querySelector('i');
+                    
+                    if (filtersContainer.style.display === 'none') {
+                        filtersContainer.style.display = 'block';
+                        icon.className = 'fas fa-chevron-up';
+                    } else {
+                        filtersContainer.style.display = 'none';
+                        icon.className = 'fas fa-chevron-down';
+                    }
+                });
+                
+                // Funzione per aggiungere tooltip alle sigle tecniche
+                function addMetricsTooltips() {
+                    // Aggiungi tooltip per le metriche di performance
+                    const metricsTooltips = [
+                        { id: 'metric-impressions', title: 'Impressions', description: 'Numero di volte che il contenuto è stato visualizzato' },
+                        { id: 'metric-clicks', title: 'Clicks', description: 'Numero di click ricevuti dagli annunci' },
+                        { id: 'metric-ctr', title: 'CTR (Click-Through Rate)', description: 'Percentuale di click rispetto alle impressions' },
+                        { id: 'metric-cpc', title: 'CPC (Cost Per Click)', description: 'Costo medio per ogni click' },
+                        { id: 'metric-conversions', title: 'Conversions', description: 'Numero di azioni completate (es. acquisti, registrazioni)' },
+                        { id: 'metric-cac', title: 'CAC (Customer Acquisition Cost)', description: 'Costo medio per acquisire un cliente' },
+                        { id: 'metric-roas', title: 'ROAS (Return On Ad Spend)', description: 'Ritorno sull\'investimento pubblicitario' },
+                        { id: 'metric-cpm', title: 'CPM (Cost Per Mille)', description: 'Costo per mille impressions' }
+                    ];
+                    
+                    // Aggiungi tooltip per ogni metrica
+                    metricsTooltips.forEach(metric => {
+                        const element = document.getElementById(metric.id);
+                        if (element) {
+                            element.setAttribute('data-bs-toggle', 'tooltip');
+                            element.setAttribute('data-bs-placement', 'top');
+                            element.setAttribute('title', `${metric.title}: ${metric.description}`);
+                        }
+                    });
+                    
+                    // Reinizializza i tooltip
+                    initTooltips();
+                }
+                
+                // Mostra una notifica di benvenuto
+                showNotification('Benvenuto nella gestione delle campagne social!', 'info');
+            });
+        </script>
+    </body>
+</html>
