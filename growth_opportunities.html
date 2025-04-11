@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opportunità di Crescita Aziendale - PMI Contatti Manager</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-light">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 bg-dark text-white p-0 sidebar">
+                <div class="d-flex flex-column p-3 h-100">
+                    <h3 class="text-center mb-4">PMI Contatti</h3>
+                    <ul class="nav nav-pills flex-column mb-auto">
+                        <li class="nav-item">
+                            <a href="index.html" class="nav-link text-white">
+                                <i class="fas fa-home me-2"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="contacts.html" class="nav-link text-white">
+                                <i class="fas fa-address-book me-2"></i> Contatti
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="social_campaigns.html" class="nav-link text-white">
+                                <i class="fas fa-bullhorn me-2"></i> Campagne Social
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="social_automations.html" class="nav-link text-white">
+                                <i class="fas fa-robot me-2"></i> Automazioni Smart
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="growth_opportunities.html" class="nav-link active">
+                                <i class="fas fa-chart-line me-2"></i> Opportunità di Crescita
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="reports.html" class="nav-link text-white">
+                                <i class="fas fa-chart-bar me-2"></i> Report
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="settings.html" class="nav-link text-white">
+                                <i class="fas fa-cog me-2"></i> Impostazioni
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Main content -->
+            <div class="col-md-10 ms-sm-auto px-4 py-3">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Opportunità di Crescita Aziendale</h1>
+                </div>
+                
+                <!-- Tabs Navigation -->
+                <ul class="nav nav-tabs mb-4" id="growthTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="bandi-tab" data-bs-toggle="tab" data-bs-target="#bandi" type="button" role="tab" aria-controls="bandi" aria-selected="true">
+                            <i class="fas fa-award me-2"></i>Bandi e Concorsi
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="investitori-tab" data-bs-toggle="tab" data-bs-target="#investitori" type="button" role="tab" aria-controls="investitori" aria-selected="false">
+                            <i class="fas fa-handshake me-2"></i>Investitori Potenziali
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="opportunita-tab" data-bs-toggle="tab" data-bs-target="#opportunita" type="button" role="tab" aria-controls="opportunita" aria-selected="false">
+                            <i class="fas fa-euro-sign me-2"></i>Opportunità di Profitto
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content" id="growthTabsContent">
+                    <!-- Bandi e Concorsi Tab -->
+                    <div class="tab-pane fade show active" id="bandi" role="tabpanel" aria-labelledby="bandi-tab">
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0">Bandi e Concorsi</h5>
+                                        <button class="btn btn-primary btn-sm" id="refresh-bandi">
+                                            <i class="fas fa-sync-alt me-1"></i> Aggiorna
+                                        </button>
+                                    </div>
+                                    <div class="card-body">
+                                        <!-- Filtri -->
+                                        <div class="row mb-3">
+                                            <div class="col-md-3">
+                                                <label for="bandi-categoria" class="form-label">Categoria</label>
+                                                <select class="form-select" id="bandi-categoria">
+                                                    <option value="">Tutte le categorie</option>
+                                                    <option value="startup">Startup</option>
+                                                    <option value="tecnologia">Tecnologia</option>
+                                                    <option value="green">Green/Sostenibilitu00e0</option>
+                                                    <option value="innovazione">Innovazione</option>
+                                                    <option value="digitale">Digitalizzazione</option>
+                                                    <option value="export">Internazionalizzazione</option>
+                                                    <option value="ricerca">Ricerca e Sviluppo</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="bandi-regione" class="form-label">Regione</label>
+                                                <select class="form-select" id="bandi-regione">
+                                                    <option value="">Tutte le regioni</option>
+                                                    <option value="lombardia">Lombardia</option>
+                                                    <option value="lazio">Lazio</option>
+                                                    <option value="veneto">Veneto</option>
+                                                    <option value="piemonte">Piemonte</option>
+                                                    <option value="emilia-romagna">Emilia-Romagna</option>
+                                                    <option value="toscana">Toscana</option>
+                                                    <option value="campania">Campania</option>
+                                                    <option value="sicilia">Sicilia</option>
+                                                    <option value="puglia">Puglia</option>
+                                                    <option value="altro">Altre regioni</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="bandi-scadenza" class="form-label">Scadenza</label>
+                                                <select class="form-select" id="bandi-scadenza">
+                                                    <option value="">Tutte le scadenze</option>
+                                                    <option value="7">Prossimi 7 giorni</option>
+                                                    <option value="30">Prossimi 30 giorni</option>
+                                                    <option value="90">Prossimi 3 mesi</option>
+                                                    <option value="180">Prossimi 6 mesi</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="bandi-importo" class="form-label">Importo minimo</label>
+                                                <select class="form-select" id="bandi-importo">
+                                                    <option value="">Qualsiasi importo</option>
+                                                    <option value="10000">10.000u20ac+</option>
+                                                    <option value="50000">50.000u20ac+</option>
+                                                    <option value="100000">100.000u20ac+</option>
+                                                    <option value="500000">500.000u20ac+</option>
+                                                    <option value="1000000">1.000.000u20ac+</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Tabella Bandi -->
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-hover" id="bandi-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Titolo</th>
+                                                        <th>Ente</th>
+                                                        <th>Categoria</th>
+                                                        <th>Regione</th>
+                                                        <th>Importo</th>
+                                                        <th>Scadenza</th>
+                                                        <th>Azioni</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="bandi-table-body">
+                                                    <!-- I dati verranno inseriti dinamicamente -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Bandi in Evidenza -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h5>Bandi in Evidenza</h5>
+                            </div>
+                        </div>
+                        
+                        <div class="row row-cols-1 row-cols-md-3 g-4 mb-4" id="bandi-evidenza">
+                            <!-- I bandi in evidenza verranno inseriti dinamicamente -->
+                        </div>
+                        
+                        <!-- Calendario Scadenze -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Calendario Scadenze</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="scadenze-calendar"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Investitori Potenziali Tab -->
+                    <div class="tab-pane fade" id="investitori" role="tabpanel" aria-labelledby="investitori-tab">
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0">Investitori Potenziali</h5>
+                                        <button class="btn btn-primary btn-sm" id="refresh-investitori">
+                                            <i class="fas fa-sync-alt me-1"></i> Aggiorna
+                                        </button>
+                                    </div>
+                                    <div class="card-body">
+                                        <!-- Filtri -->
+                                        <div class="row mb-3">
+                                            <div class="col-md-3">
+                                                <label for="investitori-tipo" class="form-label">Tipo di Investitore</label>
+                                                <select class="form-select" id="investitori-tipo">
+                                                    <option value="">Tutti i tipi</option>
+                                                    <option value="business-angel">Business Angel</option>
+                                                    <option value="venture-capital">Venture Capital</option>
+                                                    <option value="private-equity">Private Equity</option>
+                                                    <option value="crowdfunding">Piattaforme Crowdfunding</option>
+                                                    <option value="incubatori">Incubatori/Acceleratori</option>
+                                                    <option value="corporate">Corporate Venture</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="investitori-settore" class="form-label">Settore di Interesse</label>
+                                                <select class="form-select" id="investitori-settore">
+                                                    <option value="">Tutti i settori</option>
+                                                    <option value="tech">Tecnologia</option>
+                                                    <option value="fintech">FinTech</option>
+                                                    <option value="biotech">BioTech/MedTech</option>
+                                                    <option value="green">Green/Sostenibilità</option>
+                                                    <option value="ecommerce">E-commerce/Retail</option>
+                                                    <option value="saas">SaaS/Cloud</option>
+                                                    <option value="ai">AI/Machine Learning</option>
+                                                    <option value="manifattura">Manifattura</option>
+                                                    <option value="food">Food/AgriTech</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="investitori-fase" class="form-label">Fase di Investimento</label>
+                                                <select class="form-select" id="investitori-fase">
+                                                    <option value="">Tutte le fasi</option>
+                                                    <option value="seed">Seed/Pre-seed</option>
+                                                    <option value="early">Early Stage</option>
+                                                    <option value="growth">Growth Stage</option>
+                                                    <option value="late">Late Stage</option>
+                                                    <option value="expansion">Expansion</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="investitori-ticket" class="form-label">Ticket Minimo</label>
+                                                <select class="form-select" id="investitori-ticket">
+                                                    <option value="">Qualsiasi importo</option>
+                                                    <option value="10000">10.000€+</option>
+                                                    <option value="50000">50.000€+</option>
+                                                    <option value="100000">100.000€+</option>
+                                                    <option value="500000">500.000€+</option>
+                                                    <option value="1000000">1.000.000€+</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Tabella Investitori -->
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-hover" id="investitori-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Nome</th>
+                                                        <th>Tipo</th>
+                                                        <th>Settori</th>
+                                                        <th>Fase</th>
+                                                        <th>Ticket</th>
+                                                        <th>Contatti</th>
+                                                        <th>Azioni</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="investitori-table-body">
+                                                    <!-- I dati verranno inseriti dinamicamente -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Investitori Consigliati -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Investitori Consigliati per la tua Azienda</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row mb-3">
+                                            <div class="col-md-12">
+                                                <p>In base al tuo profilo aziendale, ecco alcuni investitori che potrebbero essere interessati alla tua attività:</p>
+                                            </div>
+                                        </div>
+                                        <div class="row row-cols-1 row-cols-md-3 g-4" id="investitori-consigliati">
+                                            <!-- Gli investitori consigliati verranno inseriti dinamicamente -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Form di Contatto per Investitori -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Contatta un Investitore</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <form id="contatto-investitore-form">
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label for="investitore-destinatario" class="form-label">Investitore</label>
+                                                    <select class="form-select" id="investitore-destinatario" required>
+                                                        <option value="" selected disabled>Seleziona un investitore</option>
+                                                        <!-- Le opzioni verranno inserite dinamicamente -->
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="investitore-oggetto" class="form-label">Oggetto</label>
+                                                    <input type="text" class="form-control" id="investitore-oggetto" placeholder="Es. Presentazione startup innovativa nel settore tech" required>
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <div class="col-md-12">
+                                                    <label for="investitore-messaggio" class="form-label">Messaggio</label>
+                                                    <textarea class="form-control" id="investitore-messaggio" rows="5" placeholder="Descrivi brevemente la tua azienda, il tuo progetto e perché potrebbe interessare all'investitore..." required></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <div class="col-md-12">
+                                                    <label for="investitore-allegati" class="form-label">Allegati</label>
+                                                    <input type="file" class="form-control" id="investitore-allegati" multiple>
+                                                    <div class="form-text">Puoi allegare pitch deck, business plan o altri documenti rilevanti (max 10MB)</div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12 text-end">
+                                                    <button type="submit" class="btn btn-primary">Invia Richiesta</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Opportunità di Profitto Tab -->
+                    <div class="tab-pane fade" id="opportunita" role="tabpanel" aria-labelledby="opportunita-tab">
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Strategie di Monetizzazione</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row mb-3">
+                                            <div class="col-md-12">
+                                                <p>Esplora diverse strategie di monetizzazione per la tua azienda:</p>
+                                            </div>
+                                        </div>
+                                        <div class="row row-cols-1 row-cols-md-3 g-4 mb-4" id="strategie-monetizzazione">
+                                            <!-- Strategie di monetizzazione -->
+                                            <div class="col">
+                                                <div class="card h-100">
+                                                    <div class="card-body">
+                                                        <h5 class="card-title"><i class="fas fa-ad me-2 text-primary"></i>Pubblicità</h5>
+                                                        <p class="card-text">Monetizza il tuo sito web o app attraverso annunci pubblicitari mirati.</p>
+                                                        <ul class="list-unstyled">
+                                                            <li><i class="fas fa-check-circle text-success me-2"></i>Google AdSense</li>
+                                                            <li><i class="fas fa-check-circle text-success me-2"></i>Facebook Audience Network</li>
+                                                            <li><i class="fas fa-check-circle text-success me-2"></i>Sponsorizzazioni dirette</li>
+                                                        </ul>
+                                                    </div>
+                                                    <div class="card-footer">
+                                                        <button class="btn btn-sm btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#strategiaModal" data-strategia="pubblicita">Esplora</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="card h-100">
+                                                    <div class="card-body">
+                                                        <h5 class="card-title"><i class="fas fa-handshake me-2 text-primary"></i>Affiliazioni</h5>
+                                                        <p class="card-text">Guadagna commissioni promuovendo prodotti o servizi di altre aziende.</p>
+                                                        <ul class="list-unstyled">
+                                                            <li><i class="fas fa-check-circle text-success me-2"></i>Amazon Associates</li>
+                                                            <li><i class="fas fa-check-circle text-success me-2"></i>Programmi B2B</li>
+                                                            <li><i class="fas fa-check-circle text-success me-2"></i>Marketplace specializzati</li>
+                                                        </ul>
+                                                    </div>
+                                                    <div class="card-footer">
+                                                        <button class="btn btn-sm btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#strategiaModal" data-strategia="affiliazioni">Esplora</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="card h-100">
+                                                    <div class="card-body">
+                                                        <h5 class="card-title"><i class="fas fa-credit-card me-2 text-primary"></i>Abbonamenti</h5>
+                                                        <p class="card-text">Offri servizi premium con un modello di ricavi ricorrenti.</p>
+                                                        <ul class="list-unstyled">
+                                                            <li><i class="fas fa-check-circle text-success me-2"></i>Modello freemium</li>
+                                                            <li><i class="fas fa-check-circle text-success me-2"></i>Piani mensili/annuali</li>
+                                                            <li><i class="fas fa-check-circle text-success me-2"></i>Contenuti esclusivi</li>
+                                                        </ul>
+                                                    </div>
+                                                    <div class="card-footer">
+                                                        <button class="btn btn-sm btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#strategiaModal" data-strategia="abbonamenti">Esplora</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Calcolatore ROI -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Calcolatore ROI</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <form id="roi-calculator-form">
+                                                    <div class="mb-3">
+                                                        <label for="roi-investimento" class="form-label">Investimento Iniziale (€)</label>
+                                                        <input type="number" class="form-control" id="roi-investimento" min="0" step="1000" value="10000" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="roi-ricavi" class="form-label">Ricavi Annuali Stimati (€)</label>
+                                                        <input type="number" class="form-control" id="roi-ricavi" min="0" step="1000" value="15000" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="roi-costi" class="form-label">Costi Operativi Annuali (€)</label>
+                                                        <input type="number" class="form-control" id="roi-costi" min="0" step="1000" value="5000" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="roi-anni" class="form-label">Periodo di Analisi (anni)</label>
+                                                        <input type="number" class="form-control" id="roi-anni" min="1" max="10" value="3" required>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-primary">Calcola ROI</button>
+                                                </form>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="card bg-light">
+                                                    <div class="card-body">
+                                                        <h5 class="card-title">Risultati Analisi</h5>
+                                                        <div class="row mb-2">
+                                                            <div class="col-6">ROI:</div>
+                                                            <div class="col-6 text-end"><span id="roi-result" class="fw-bold">0%</span></div>
+                                                        </div>
+                                                        <div class="row mb-2">
+                                                            <div class="col-6">Payback Period:</div>
+                                                            <div class="col-6 text-end"><span id="payback-result" class="fw-bold">0 anni</span></div>
+                                                        </div>
+                                                        <div class="row mb-2">
+                                                            <div class="col-6">Profitto Netto:</div>
+                                                            <div class="col-6 text-end"><span id="profitto-result" class="fw-bold">€0</span></div>
+                                                        </div>
+                                                        <div class="mt-3">
+                                                            <canvas id="roi-chart" height="200"></canvas>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Opportunità di Diversificazione -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Opportunità di Diversificazione</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-hover" id="diversificazione-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Settore</th>
+                                                        <th>Potenziale di Crescita</th>
+                                                        <th>Investimento Richiesto</th>
+                                                        <th>Complessità</th>
+                                                        <th>ROI Stimato</th>
+                                                        <th>Azioni</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="diversificazione-table-body">
+                                                    <!-- I dati verranno inseriti dinamicamente -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Strategia di Monetizzazione -->
+    <div class="modal fade" id="strategiaModal" tabindex="-1" aria-labelledby="strategiaModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="strategiaModalLabel">Dettagli Strategia</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="strategia-modal-content">
+                    <!-- Contenuto dinamico -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                    <button type="button" class="btn btn-primary" id="strategia-action-btn">Implementa</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Dettagli Bando -->
+    <div class="modal fade" id="bandoModal" tabindex="-1" aria-labelledby="bandoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bandoModalLabel">Dettagli Bando</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="bando-modal-content">
+                    <!-- Contenuto dinamico -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                    <button type="button" class="btn btn-primary" id="bando-action-btn">Partecipa</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Dettagli Investitore -->
+    <div class="modal fade" id="investitoreModal" tabindex="-1" aria-labelledby="investitoreModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="investitoreModalLabel">Dettagli Investitore</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="investitore-modal-content">
+                    <!-- Contenuto dinamico -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                    <button type="button" class="btn btn-primary" id="investitore-action-btn">Contatta</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    
+    <!-- FullCalendar -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+    
+    <!-- Custom JS -->
+    <script src="js/growth_opportunities.js"></script>
+</body>
+</html>
