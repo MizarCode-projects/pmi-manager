@@ -1,0 +1,3143 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PMI Contatti Manager</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --info-color: #0dcaf0;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --body-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+        }
+        
+        .dark-mode {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --info-color: #0dcaf0;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --light-color: #343a40;
+            --dark-color: #f8f9fa;
+            --body-bg: #212529;
+            --card-bg: #343a40;
+            --text-color: #f8f9fa;
+            --border-color: #495057;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .card {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        
+        .table {
+            color: var(--text-color);
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-non-contattato { background-color: #f8f9fa; color: #212529; }
+        .status-email-inviata { background-color: #cff4fc; color: #055160; }
+        .status-risposta-ricevuta { background-color: #d1e7dd; color: #0f5132; }
+        .status-non-interessato { background-color: #f8d7da; color: #842029; }
+        .status-cliente-potenziale { background-color: #fff3cd; color: #664d03; }
+        .status-cliente-acquisito { background-color: #9ec5fe; color: #084298; }
+        .chart-container {
+            height: 300px;
+        }
+        
+        .filter-container {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+        }
+        
+        .theme-switch {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease;
+        }
+        
+        .theme-switch:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .tag {
+            display: inline-block;
+            padding: 3px 8px;
+            margin: 2px;
+            border-radius: 12px;
+            font-size: 12px;
+            background-color: var(--info-color);
+            color: white;
+        }
+        
+        .tag-removable {
+            cursor: pointer;
+        }
+        
+        .opportunity-stage {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            background-color: var(--light-color);
+            border-left: 5px solid var(--primary-color);
+        }
+        
+        .opportunity-stage.stage-lead {
+            border-left-color: var(--info-color);
+        }
+        
+        .opportunity-stage.stage-qualified {
+            border-left-color: var(--warning-color);
+        }
+        
+        .opportunity-stage.stage-proposal {
+            border-left-color: var(--primary-color);
+        }
+        
+        .opportunity-stage.stage-negotiation {
+            border-left-color: var(--secondary-color);
+        }
+        
+        .opportunity-stage.stage-closed-won {
+            border-left-color: var(--success-color);
+        }
+        
+        .opportunity-stage.stage-closed-lost {
+            border-left-color: var(--danger-color);
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-left: 30px;
+        }
+        
+        .timeline-icon {
+            position: absolute;
+            left: 0;
+            top: 5px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #map-container {
+            height: 300px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .news-item {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .news-item:last-child {
+            border-bottom: none;
+        }
+        
+        .news-item .news-date {
+            font-size: 0.8rem;
+            color: var(--secondary-color);
+        }
+        
+        .news-item .news-title {
+            font-weight: bold;
+        }
+        
+        .news-item .news-source {
+            font-size: 0.8rem;
+            color: var(--secondary-color);
+        }
+        
+        .company-data-source {
+            font-size: 0.8rem;
+            color: var(--secondary-color);
+            margin-top: 5px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid mt-4">
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <h1 class="text-center">PMI Contatti Manager</h1>
+                <p class="lead text-center">Sistema di gestione contatti PMI italiane</p>
+                <div class="d-flex justify-content-center gap-3 mb-3">
+                    <a href="index.html" class="btn btn-primary"><i class="fas fa-home me-1"></i> Home</a>
+                    <a href="scraping.html" class="btn btn-info"><i class="fas fa-search me-1"></i> Scraping</a>
+                    <a href="social_campaigns.html" class="btn btn-success"><i class="fas fa-bullhorn me-1"></i> Campagne</a>
+                    <a href="social_dashboard.html" class="btn btn-warning"><i class="fas fa-chart-line me-1"></i> Dashboard</a>
+                    <a href="website_analyzer/index.html" class="btn btn-danger"><i class="fas fa-microscope me-1"></i> Website Analyzer</a>
+                    <a href="growth_opportunities.html" class="btn btn-secondary"><i class="fas fa-chart-line me-1"></i> Opportunità di Crescita</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="filter-container">
+                    <h5><i class="fas fa-filter"></i> Filtri Avanzati</h5>
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <label for="filter-sector" class="form-label">Settore</label>
+                            <select id="filter-sector" class="form-select form-select-sm">
+                                <option value="">Tutti i settori</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label for="filter-province" class="form-label">Provincia</label>
+                            <select id="filter-province" class="form-select form-select-sm">
+                                <option value="">Tutte le province</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label for="filter-status" class="form-label">Stato</label>
+                            <select id="filter-status" class="form-select form-select-sm">
+                                <option value="">Tutti gli stati</option>
+                                <option value="Non contattato">Non contattato</option>
+                                <option value="Email inviata">Email inviata</option>
+                                <option value="Risposta ricevuta">Risposta ricevuta</option>
+                                <option value="Non interessato">Non interessato</option>
+                                <option value="Cliente potenziale">Cliente potenziale</option>
+                                <option value="Cliente acquisito">Cliente acquisito</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label for="filter-size" class="form-label">Dimensione</label>
+                            <select id="filter-size" class="form-select form-select-sm">
+                                <option value="">Tutte le dimensioni</option>
+                                <option value="micro">Micro (1-9 dipendenti)</option>
+                                <option value="piccola">Piccola (10-49 dipendenti)</option>
+                                <option value="media">Media (50-249 dipendenti)</option>
+                                <option value="grande">Grande (250+ dipendenti)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-9">
+                            <div id="active-filters" class="d-flex flex-wrap align-items-center">
+                                <!-- I filtri attivi verranno mostrati qui -->
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-end">
+                            <button id="apply-filters-btn" class="btn btn-sm btn-primary"><i class="fas fa-check"></i> Applica Filtri</button>
+                            <button id="reset-filters-btn" class="btn btn-sm btn-secondary"><i class="fas fa-times"></i> Reset</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">Statistiche</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="stats-container">
+                            <p>Caricamento statistiche...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mt-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">Stato Contatti</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="status-chart" class="chart-container"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card mt-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title mb-0">Top Settori</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="sectors-chart" class="chart-container"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card mt-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="card-title mb-0">Distribuzione Geografica</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="geo-chart" class="chart-container"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card mt-4">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="card-title mb-0">Dimensione Aziende</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="size-chart" class="chart-container"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-9">
+                <div class="card">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Gestione Contatti PMI</h5>
+                        <div>
+                            <button class="btn btn-light btn-sm" id="add-contact-btn" data-bs-toggle="modal" data-bs-target="#add-contact-modal"><i class="fas fa-plus"></i> Aggiungi Azienda</button>
+                            <button class="btn btn-light btn-sm ms-2" id="scraping-btn" data-bs-toggle="modal" data-bs-target="#scraping-modal"><i class="fas fa-search"></i> Ricerca Aziende</button>
+                            <button id="export-btn" class="btn btn-sm btn-light me-2">Esporta CSV</button>
+                            <button id="campaign-btn" class="btn btn-sm btn-warning">Campagna Email</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="contacts-table" class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th><input type="checkbox" id="select-all-contacts" title="Seleziona tutti"></th>
+                                        <th>Ragione Sociale</th>
+                                        <th>Settore</th>
+                                        <th>Email</th>
+                                        <th>Telefono</th>
+                                        <th>Città</th>
+                                        <th>Stato</th>
+                                        <th>Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="contacts-body">
+                                    <tr>
+                                        <td colspan="8" class="text-center">Caricamento contatti...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="email-template-container" class="card mt-4" style="display: none;">
+                    <div class="card-header bg-warning d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Template Email</h5>
+                        <div>
+                            <span id="selected-count" class="badge bg-primary me-2">0 aziende selezionate</span>
+                            <button id="launch-campaign-btn" class="btn btn-sm btn-success">Lancia Campagna</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form id="email-template-form">
+                            <div class="mb-3">
+                                <label for="email-subject" class="form-label">Oggetto Email</label>
+                                <input type="text" class="form-control" id="email-subject" 
+                                       value="Opportunità di collaborazione per [Nome Azienda]">
+                            </div>
+                            <div class="mb-3">
+                                <label for="email-body" class="form-label">Corpo Email</label>
+                                <textarea class="form-control" id="email-body" rows="8">Gentile [Nome Azienda],
+
+Mi chiamo [Tuo Nome] e sono [Tua Posizione] presso [Tua Azienda].
+
+Ho individuato la vostra azienda come potenziale partner per [breve descrizione del tuo prodotto/servizio] che potrebbe essere di interesse per la vostra attività nel settore [Settore].
+
+I principali vantaggi della nostra soluzione includono:
+- [Vantaggio 1]
+- [Vantaggio 2]
+- [Vantaggio 3]
+
+Sarei lieto di organizzare una breve chiamata per discutere come possiamo aiutarvi a [obiettivo rilevante per il cliente].
+
+È possibile fissare un appuntamento al seguente link: [Link Calendly]
+
+Cordiali saluti,
+[Tuo Nome]
+[Tua Posizione]
+[Tua Azienda]
+[Tuo Numero di Telefono]
+[Tuo Sito Web]</textarea>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-primary" id="preview-email-btn">Anteprima Email</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sezione Grafici Dashboard -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Distribuzione per Settore</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="sector-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Distribuzione per Provincia</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="province-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sezione Automazioni Smart -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0"><i class="fas fa-robot me-2"></i>Automazioni smart per LinkedIn e social</h5>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#automationModal">
+                            <i class="fas fa-plus me-1"></i> Nuova Automazione
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="automation-builder-container p-3 bg-light rounded border">
+                                    <h6 class="text-muted mb-3"><i class="fas fa-puzzle-piece me-2"></i>Costruisci il tuo workflow</h6>
+                                    <div class="automation-builder d-flex flex-wrap" id="automation-builder">
+                                        <div class="automation-step-container me-2 mb-2">
+                                            <div class="automation-step p-2 bg-white rounded border" draggable="true" data-step-type="trigger">
+                                                <i class="fas fa-play-circle text-success me-2"></i>Trigger
+                                            </div>
+                                        </div>
+                                        <div class="automation-step-container me-2 mb-2">
+                                            <div class="automation-step p-2 bg-white rounded border" draggable="true" data-step-type="action">
+                                                <i class="fas fa-cog text-primary me-2"></i>Azione
+                                            </div>
+                                        </div>
+                                        <div class="automation-step-container me-2 mb-2">
+                                            <div class="automation-step p-2 bg-white rounded border" draggable="true" data-step-type="condition">
+                                                <i class="fas fa-code-branch text-warning me-2"></i>Condizione
+                                            </div>
+                                        </div>
+                                        <div class="automation-step-container me-2 mb-2">
+                                            <div class="automation-step p-2 bg-white rounded border" draggable="true" data-step-type="export">
+                                                <i class="fas fa-file-export text-info me-2"></i>Esporta
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h6 class="border-bottom pb-2 mb-3">Moduli disponibili</h6>
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <h6 class="card-title"><i class="fas fa-user-circle text-primary me-2"></i>Profile Scraper</h6>
+                                                <p class="card-text small">Estrai dati da profili LinkedIn (nome, headline, posizione, collegamenti, ecc.)</p>
+                                                <button class="btn btn-sm btn-outline-primary">Configura</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <h6 class="card-title"><i class="fas fa-link text-success me-2"></i>AutoConnect</h6>
+                                                <p class="card-text small">Manda richieste di collegamento con messaggi personalizzati</p>
+                                                <button class="btn btn-sm btn-outline-success">Configura</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <h6 class="card-title"><i class="fas fa-comment-dots text-info me-2"></i>AutoMessage</h6>
+                                                <p class="card-text small">Manda messaggi a contatti esistenti (es. funnel post-connessione)</p>
+                                                <button class="btn btn-sm btn-outline-info">Configura</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <h6 class="card-title"><i class="fas fa-newspaper text-warning me-2"></i>Post Extractor</h6>
+                                                <p class="card-text small">Estrai testo, like, commenti, hashtag dai post pubblici di LinkedIn</p>
+                                                <button class="btn btn-sm btn-outline-warning">Configura</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <h6 class="card-title"><i class="fas fa-building text-secondary me-2"></i>Company Scraper</h6>
+                                                <p class="card-text small">Esporta info da pagine aziendali (industria, dimensioni, descrizione, ecc.)</p>
+                                                <button class="btn btn-sm btn-outline-secondary">Configura</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <h6 class="card-title"><i class="fas fa-briefcase text-danger me-2"></i>Job Crawler</h6>
+                                                <p class="card-text small">Cerca offerte di lavoro per parola chiave/località</p>
+                                                <button class="btn btn-sm btn-outline-danger">Configura</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h6 class="border-bottom pb-2 mb-3">Automazioni attive</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-striped" id="automations-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Nome</th>
+                                                <th>Tipo</th>
+                                                <th>Piattaforma</th>
+                                                <th>Stato</th>
+                                                <th>Ultima esecuzione</th>
+                                                <th>Risultati</th>
+                                                <th>Azioni</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Lead Generation PMI Milano</td>
+                                                <td><span class="badge bg-primary">Profile Scraper</span></td>
+                                                <td>LinkedIn</td>
+                                                <td><span class="badge bg-success">Attivo</span></td>
+                                                <td>09/04/2025 15:30</td>
+                                                <td>127 contatti</td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <button class="btn btn-outline-info" data-bs-toggle="tooltip" title="Visualizza risultati"><i class="fas fa-eye"></i></button>
+                                                        <button class="btn btn-outline-primary" data-bs-toggle="tooltip" title="Modifica"><i class="fas fa-edit"></i></button>
+                                                        <button class="btn btn-outline-danger" data-bs-toggle="tooltip" title="Elimina"><i class="fas fa-trash"></i></button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Inviti automatici settore IT</td>
+                                                <td><span class="badge bg-success">AutoConnect</span></td>
+                                                <td>LinkedIn</td>
+                                                <td><span class="badge bg-warning">In pausa</span></td>
+                                                <td>08/04/2025 10:15</td>
+                                                <td>43 inviti inviati</td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <button class="btn btn-outline-info" data-bs-toggle="tooltip" title="Visualizza risultati"><i class="fas fa-eye"></i></button>
+                                                        <button class="btn btn-outline-primary" data-bs-toggle="tooltip" title="Modifica"><i class="fas fa-edit"></i></button>
+                                                        <button class="btn btn-outline-danger" data-bs-toggle="tooltip" title="Elimina"><i class="fas fa-trash"></i></button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Estrazione post #innovazione</td>
+                                                <td><span class="badge bg-warning">Post Extractor</span></td>
+                                                <td>LinkedIn</td>
+                                                <td><span class="badge bg-success">Attivo</span></td>
+                                                <td>09/04/2025 18:45</td>
+                                                <td>78 post</td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <button class="btn btn-outline-info" data-bs-toggle="tooltip" title="Visualizza risultati"><i class="fas fa-eye"></i></button>
+                                                        <button class="btn btn-outline-primary" data-bs-toggle="tooltip" title="Modifica"><i class="fas fa-edit"></i></button>
+                                                        <button class="btn btn-outline-danger" data-bs-toggle="tooltip" title="Elimina"><i class="fas fa-trash"></i></button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <!-- Modal per i dettagli del contatto -->
+    <div class="modal fade" id="contact-details-modal" tabindex="-1" aria-labelledby="contact-details-modal-label" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="contact-details-modal-label">Dettagli Contatto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs mb-3" id="contactDetailsTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details-tab-pane" type="button" role="tab" aria-controls="details-tab-pane" aria-selected="true">Dettagli</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="crm-tab" data-bs-toggle="tab" data-bs-target="#crm-tab-pane" type="button" role="tab" aria-controls="crm-tab-pane" aria-selected="false">CRM</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="enrichment-tab" data-bs-toggle="tab" data-bs-target="#enrichment-tab-pane" type="button" role="tab" aria-controls="enrichment-tab-pane" aria-selected="false">Arricchimento</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="news-tab" data-bs-toggle="tab" data-bs-target="#news-tab-pane" type="button" role="tab" aria-controls="news-tab-pane" aria-selected="false">Notizie</button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content" id="contactDetailsTabsContent">
+                        <!-- Tab Dettagli -->
+                        <div class="tab-pane fade show active" id="details-tab-pane" role="tabpanel" aria-labelledby="details-tab" tabindex="0">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="mb-3" id="contact-details-container">
+                                        <!-- I dettagli del contatto verranno inseriti qui -->
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <h5><i class="fas fa-history"></i> Timeline</h5>
+                                    <div id="contact-timeline" class="border-start ps-3">
+                                        <!-- La timeline verrà inserita qui -->
+                                    </div>
+                                    <div class="mt-3">
+                                        <h6>Aggiungi Interazione</h6>
+                                        <div class="mb-2">
+                                            <select id="interaction-type" class="form-select form-select-sm">
+                                                <option value="email">Email</option>
+                                                <option value="call">Chiamata</option>
+                                                <option value="meeting">Incontro</option>
+                                                <option value="note">Nota</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-2">
+                                            <textarea id="interaction-notes" class="form-control form-control-sm" rows="2" placeholder="Descrizione interazione..."></textarea>
+                                        </div>
+                                        <button id="add-interaction" class="btn btn-sm btn-primary"><i class="fas fa-plus"></i> Aggiungi</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Tab CRM -->
+                        <div class="tab-pane fade" id="crm-tab-pane" role="tabpanel" aria-labelledby="crm-tab" tabindex="0">
+                            <div class="mb-3">
+                                <h5><i class="fas fa-chart-line"></i> Pipeline di Vendita</h5>
+                                <select id="opportunity-stage" class="form-select mb-2">
+                                    <option value="">-- Seleziona fase --</option>
+                                    <option value="lead">Lead</option>
+                                    <option value="qualified">Qualificato</option>
+                                    <option value="proposal">Proposta</option>
+                                    <option value="negotiation">Negoziazione</option>
+                                    <option value="closed-won">Chiuso (Vinto)</option>
+                                    <option value="closed-lost">Chiuso (Perso)</option>
+                                </select>
+                                <div id="opportunity-details" class="mb-3">
+                                    <div class="opportunity-stage stage-lead" style="display: none;">
+                                        <h6>Lead</h6>
+                                        <p class="text-muted">Contatto iniziale, potenziale interesse.</p>
+                                    </div>
+                                    <div class="opportunity-stage stage-qualified" style="display: none;">
+                                        <h6>Qualificato</h6>
+                                        <p class="text-muted">Interesse confermato, valutazione dei bisogni.</p>
+                                    </div>
+                                    <div class="opportunity-stage stage-proposal" style="display: none;">
+                                        <h6>Proposta</h6>
+                                        <p class="text-muted">Proposta inviata, in attesa di feedback.</p>
+                                        <div class="mb-2">
+                                            <label class="form-label">Valore Proposta (€)</label>
+                                            <input type="number" id="proposal-value" class="form-control form-control-sm">
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label">Data Invio Proposta</label>
+                                            <input type="date" id="proposal-date" class="form-control form-control-sm">
+                                        </div>
+                                    </div>
+                                    <div class="opportunity-stage stage-negotiation" style="display: none;">
+                                        <h6>Negoziazione</h6>
+                                        <p class="text-muted">Discussione dei termini e condizioni.</p>
+                                        <div class="mb-2">
+                                            <label class="form-label">Note Negoziazione</label>
+                                            <textarea id="negotiation-notes" class="form-control form-control-sm" rows="2"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="opportunity-stage stage-closed-won" style="display: none;">
+                                        <h6>Chiuso (Vinto)</h6>
+                                        <p class="text-muted">Contratto firmato, cliente acquisito.</p>
+                                        <div class="mb-2">
+                                            <label class="form-label">Valore Finale (€)</label>
+                                            <input type="number" id="final-value" class="form-control form-control-sm">
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label">Data Chiusura</label>
+                                            <input type="date" id="closing-date" class="form-control form-control-sm">
+                                        </div>
+                                    </div>
+                                    <div class="opportunity-stage stage-closed-lost" style="display: none;">
+                                        <h6>Chiuso (Perso)</h6>
+                                        <p class="text-muted">Opportunità persa.</p>
+                                        <div class="mb-2">
+                                            <label class="form-label">Motivo Perdita</label>
+                                            <select id="loss-reason" class="form-select form-select-sm">
+                                                <option value="prezzo">Prezzo troppo alto</option>
+                                                <option value="concorrenza">Scelta concorrenza</option>
+                                                <option value="timing">Timing non adeguato</option>
+                                                <option value="bisogni">Non risponde ai bisogni</option>
+                                                <option value="budget">Mancanza di budget</option>
+                                                <option value="altro">Altro</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button id="save-opportunity" class="btn btn-sm btn-success"><i class="fas fa-save"></i> Salva Opportunità</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Tab Arricchimento -->
+                        <div class="tab-pane fade" id="enrichment-tab-pane" role="tabpanel" aria-labelledby="enrichment-tab" tabindex="0">
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h5><i class="fas fa-database"></i> Dati Aziendali</h5>
+                                        <button id="enrich-data-btn" class="btn btn-sm btn-primary"><i class="fas fa-sync"></i> Arricchisci Dati</button>
+                                    </div>
+                                    <div id="company-enrichment-data" class="card">
+                                        <div class="card-body">
+                                            <div id="enrichment-loading" style="display: none;">
+                                                <div class="d-flex justify-content-center">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="visually-hidden">Caricamento...</span>
+                                                    </div>
+                                                </div>
+                                                <p class="text-center mt-2">Ricerca dati in corso...</p>
+                                            </div>
+                                            <div id="enrichment-content">
+                                                <p class="text-muted text-center">Clicca su "Arricchisci Dati" per cercare informazioni aggiuntive su questa azienda.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h5><i class="fas fa-map-marker-alt"></i> Posizione</h5>
+                                    <div id="map-container"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Tab Notizie -->
+                        <div class="tab-pane fade" id="news-tab-pane" role="tabpanel" aria-labelledby="news-tab" tabindex="0">
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h5><i class="fas fa-newspaper"></i> Notizie Correlate</h5>
+                                        <button id="fetch-news-btn" class="btn btn-sm btn-primary"><i class="fas fa-sync"></i> Aggiorna Notizie</button>
+                                    </div>
+                                    <div id="company-news" class="card">
+                                        <div class="card-body">
+                                            <div id="news-loading" style="display: none;">
+                                                <div class="d-flex justify-content-center">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="visually-hidden">Caricamento...</span>
+                                                    </div>
+                                                </div>
+                                                <p class="text-center mt-2">Ricerca notizie in corso...</p>
+                                            </div>
+                                            <div id="news-content">
+                                                <p class="text-muted text-center">Clicca su "Aggiorna Notizie" per cercare notizie recenti su questa azienda e il suo settore.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                    <button type="button" class="btn btn-primary" id="save-contact-details">Salva Modifiche</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal per l'anteprima email -->
+    <div class="modal fade" id="email-preview-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="email-preview-title">Anteprima Email</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6 class="fw-bold">Oggetto:</h6>
+                    <div id="preview-subject" class="mb-3 p-2 border rounded">Caricamento oggetto...</div>
+                    <h6 class="fw-bold">Corpo:</h6>
+                    <div id="preview-body" class="p-2 border rounded">Caricamento anteprima...</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal per aggiungere un nuovo contatto -->
+    <div class="modal fade" id="add-contact-modal" tabindex="-1" aria-labelledby="add-contact-modal-label" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="add-contact-modal-label">Aggiungi Nuova Azienda</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="add-contact-form">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="mb-2">
+                                    <label for="new-company-name" class="form-label">Ragione Sociale *</label>
+                                    <input type="text" class="form-control" id="new-company-name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-2">
+                                    <label for="new-company-sector" class="form-label">Settore *</label>
+                                    <select class="form-select" id="new-company-sector" required>
+                                        <option value="">-- Seleziona settore --</option>
+                                        <option value="Tecnologia">Tecnologia</option>
+                                        <option value="Manifatturiero">Manifatturiero</option>
+                                        <option value="Servizi">Servizi</option>
+                                        <option value="Commercio">Commercio</option>
+                                        <option value="Edilizia">Edilizia</option>
+                                        <option value="Ristorazione">Ristorazione</option>
+                                        <option value="Turismo">Turismo</option>
+                                        <option value="Agricoltura">Agricoltura</option>
+                                        <option value="Trasporti">Trasporti</option>
+                                        <option value="Sanità">Sanità</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="mb-2">
+                                    <label for="new-company-email" class="form-label">Email *</label>
+                                    <input type="email" class="form-control" id="new-company-email" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-2">
+                                    <label for="new-company-phone" class="form-label">Telefono</label>
+                                    <input type="tel" class="form-control" id="new-company-phone">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <div class="mb-2">
+                                    <label for="new-company-address" class="form-label">Indirizzo</label>
+                                    <input type="text" class="form-control" id="new-company-address">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <div class="mb-2">
+                                    <label for="new-company-city" class="form-label">Città</label>
+                                    <input type="text" class="form-control" id="new-company-city">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-2">
+                                    <label for="new-company-province" class="form-label">Provincia</label>
+                                    <input type="text" class="form-control" id="new-company-province">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-2">
+                                    <label for="new-company-zip" class="form-label">CAP</label>
+                                    <input type="text" class="form-control" id="new-company-zip">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="mb-2">
+                                    <label for="new-company-website" class="form-label">Sito Web</label>
+                                    <input type="url" class="form-control" id="new-company-website">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-2">
+                                    <label for="new-company-employees" class="form-label">Dipendenti</label>
+                                    <input type="number" class="form-control" id="new-company-employees">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="new-company-notes" class="form-label">Note</label>
+                            <textarea class="form-control" id="new-company-notes" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                    <button type="button" class="btn btn-primary" id="save-new-contact-btn">Salva</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal per il web scraping personalizzato -->
+    <div class="modal fade" id="scraping-modal" tabindex="-1" aria-labelledby="scraping-modal-label" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="scraping-modal-label">Ricerca Aziende</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="mb-2">
+                                <label for="scraping-location" class="form-label">Località</label>
+                                <input type="text" class="form-control" id="scraping-location" placeholder="Es. Milano, Roma, Napoli...">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-2">
+                                <label for="scraping-sector" class="form-label">Settore</label>
+                                <select class="form-select" id="scraping-sector">
+                                    <option value="">Tutti i settori</option>
+                                    <option value="Tecnologia">Tecnologia</option>
+                                    <option value="Manifatturiero">Manifatturiero</option>
+                                    <option value="Servizi">Servizi</option>
+                                    <option value="Commercio">Commercio</option>
+                                    <option value="Edilizia">Edilizia</option>
+                                    <option value="Ristorazione">Ristorazione</option>
+                                    <option value="Turismo">Turismo</option>
+                                    <option value="Agricoltura">Agricoltura</option>
+                                    <option value="Trasporti">Trasporti</option>
+                                    <option value="Sanità">Sanità</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="mb-2">
+                                <label for="scraping-size" class="form-label">Dimensione</label>
+                                <select class="form-select" id="scraping-size">
+                                    <option value="">Tutte le dimensioni</option>
+                                    <option value="micro">Micro (1-9 dipendenti)</option>
+                                    <option value="piccola">Piccola (10-49 dipendenti)</option>
+                                    <option value="media">Media (50-249 dipendenti)</option>
+                                    <option value="grande">Grande (250+ dipendenti)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-2">
+                                <label for="scraping-count" class="form-label">Numero risultati</label>
+                                <input type="number" class="form-control" id="scraping-count" value="10" min="1" max="50">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary" id="start-scraping-btn">Avvia Ricerca</button>
+                    </div>
+                    
+                    <div id="scraping-results" class="mt-3" style="display: none;">
+                        <h6>Risultati della ricerca</h6>
+                        <div class="progress mb-3" id="scraping-progress" style="display: none;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+                        </div>
+                        <div id="scraping-results-content"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                    <button type="button" class="btn btn-success" id="import-results-btn" style="display: none;">Importa Risultati</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal per la campagna social -->
+    <div class="modal fade" id="socialCampaignModal" tabindex="-1" aria-labelledby="socialCampaignModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="socialCampaignModalLabel">Nuova Campagna Social</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="social-campaign-form">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="campaign-name" class="form-label">Nome Campagna</label>
+                                <input type="text" class="form-control" id="campaign-name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="campaign-platform" class="form-label">Piattaforma</label>
+                                <select class="form-select" id="campaign-platform" required>
+                                    <option value="">Seleziona piattaforma</option>
+                                    <option value="Instagram">Instagram</option>
+                                    <option value="TikTok">TikTok</option>
+                                    <option value="Facebook">Facebook</option>
+                                    <option value="LinkedIn">LinkedIn</option>
+                                    <option value="Twitter">Twitter</option>
+                                    <option value="YouTube">YouTube</option>
+                                    <option value="Google Ads">Google Ads</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="campaign-target" class="form-label">Target</label>
+                                <select class="form-select" id="campaign-target" required>
+                                    <option value="">Seleziona target</option>
+                                    <option value="Tutti i contatti">Tutti i contatti</option>
+                                    <option value="Contatti selezionati">Contatti selezionati</option>
+                                    <option value="Filtro personalizzato">Filtro personalizzato</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="campaign-budget" class="form-label">Budget (€)</label>
+                                <input type="number" class="form-control" id="campaign-budget" min="0" step="50" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3" id="target-filter-container" style="display: none;">
+                            <div class="col-md-4">
+                                <label for="filter-campaign-sector" class="form-label">Settore</label>
+                                <select id="filter-campaign-sector" class="form-select">
+                                    <option value="">Tutti i settori</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="filter-campaign-province" class="form-label">Provincia</label>
+                                <select id="filter-campaign-province" class="form-select">
+                                    <option value="">Tutte le province</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="filter-campaign-size" class="form-label">Dimensione</label>
+                                <select id="filter-campaign-size" class="form-select">
+                                    <option value="">Tutte le dimensioni</option>
+                                    <option value="micro">Micro (1-9 dipendenti)</option>
+                                    <option value="piccola">Piccola (10-49 dipendenti)</option>
+                                    <option value="media">Media (50-249 dipendenti)</option>
+                                    <option value="grande">Grande (250+ dipendenti)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="campaign-start-date" class="form-label">Data Inizio</label>
+                                <input type="date" class="form-control" id="campaign-start-date" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="campaign-end-date" class="form-label">Data Fine</label>
+                                <input type="date" class="form-control" id="campaign-end-date" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="campaign-description" class="form-label">Descrizione Campagna</label>
+                            <textarea class="form-control" id="campaign-description" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="campaign-objectives" class="form-label">Obiettivi</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="awareness" id="objective-awareness">
+                                <label class="form-check-label" for="objective-awareness">Awareness</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="engagement" id="objective-engagement">
+                                <label class="form-check-label" for="objective-engagement">Engagement</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="leads" id="objective-leads">
+                                <label class="form-check-label" for="objective-leads">Generazione Lead</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="sales" id="objective-sales">
+                                <label class="form-check-label" for="objective-sales">Vendite</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                    <button type="button" class="btn btn-primary" id="save-social-campaign">Salva Campagna</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Container per i modali delle automazioni -->
+    <div id="automation-modals-container"></div>
+
+    <!-- Pulsante per cambiare tema -->
+    <div class="theme-switch" id="theme-switch">
+        <i class="fas fa-moon"></i>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.1/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+    <script src="js/charts.js"></script>
+    <script src="js/scraping_reale.js"></script>
+    <script src="js/social_automations.js"></script>
+    <script src="js/linkedin_automation.js"></script>
+    <script src="js/company_scraper.js"></script>
+    <script src="js/job_crawler.js"></script>
+    <script src="js/data_exporter.js"></script>
+    
+    <script>
+        // Stati possibili per i contatti
+        const STATI = [
+            'Non contattato',
+            'Email inviata',
+            'Risposta ricevuta',
+            'Non interessato',
+            'Cliente potenziale',
+            'Cliente acquisito'
+        ];
+        
+        // Colori per il grafico degli stati
+        const STATUS_COLORS = [
+            '#f8f9fa',
+            '#cff4fc',
+            '#d1e7dd',
+            '#f8d7da',
+            '#fff3cd',
+            '#9ec5fe'
+        ];
+        
+        // Colori per il grafico dei settori
+        const SECTOR_COLORS = [
+            '#4e73df',
+            '#1cc88a',
+            '#36b9cc',
+            '#f6c23e',
+            '#e74a3b',
+            '#858796',
+            '#5a5c69',
+            '#2e59d9',
+            '#17a673',
+            '#2c9faf'
+        ];
+        
+        let contacts = [];
+        let dataTable;
+        let statusChart;
+        let sectorsChart;
+        let filteredContacts = [];
+        let activeFilters = {};
+        let socialCampaigns = [];
+        
+        // Carica i contatti dal CSV
+        async function loadContacts() {
+            // Controlla se ci sono contatti nel localStorage
+            const savedContacts = localStorage.getItem('pmi_contacts');
+            if (savedContacts) {
+                contacts = JSON.parse(savedContacts);
+                renderContacts();
+                initCharts(contacts); // Aggiungo la chiamata a initCharts()
+                return;
+            }
+            
+            // Altrimenti carica dal file CSV
+            fetch('pmi_data.csv')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Errore HTTP: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(text => {
+                    contacts = parseCSV(text);
+                    saveContacts();
+                    renderContacts();
+                    initCharts(contacts); // Aggiungo la chiamata a initCharts()
+                })
+                .catch(error => {
+                    console.error('Errore nel caricamento dei contatti:', error);
+                    // Crea alcuni contatti di esempio se non è possibile caricare il file
+                    contacts = [];
+                    for (let i = 0; i < 10; i++) {
+                        contacts.push({
+                            'Ragione Sociale': `Azienda Esempio ${i+1}`,
+                            'Settore': 'Tecnologia',
+                            'Email': `info@esempio${i+1}.com`,
+                            'Telefono': '0123456789',
+                            'Città': 'Milano',
+                            'Provincia': 'Milano',
+                            'Stato': 'Non contattato'
+                        });
+                    }
+                    saveContacts();
+                    renderContacts();
+                    initCharts(contacts); // Aggiungo la chiamata a initCharts()
+                });
+        }
+        
+        // Parsing CSV
+        function parseCSV(text) {
+            const lines = text.split('\n');
+            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+            
+            const result = [];
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                
+                const values = [];
+                let inQuotes = false;
+                let currentValue = '';
+                
+                for (let char of lines[i]) {
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        values.push(currentValue);
+                        currentValue = '';
+                    } else {
+                        currentValue += char;
+                    }
+                }
+                values.push(currentValue);
+                
+                const obj = {};
+                for (let j = 0; j < headers.length; j++) {
+                    obj[headers[j]] = values[j] ? values[j].replace(/"/g, '') : '';
+                }
+                result.push(obj);
+            }
+            
+            // Aggiungi campi di stato se non esistono
+            result.forEach(contact => {
+                if (!contact['Stato']) contact['Stato'] = 'Non contattato';
+                if (!contact['Data contatto']) contact['Data contatto'] = '';
+                if (!contact['Data risposta']) contact['Data risposta'] = '';
+                if (!contact['Note']) contact['Note'] = '';
+                
+                // Aggiungi campo selected per la selezione multipla
+                contact.selected = false;
+            });
+            
+            return result;
+        }
+        
+        // Renderizza la tabella dei contatti
+        function renderContacts() {
+            const tableBody = document.querySelector('#contacts-table tbody');
+            if (!tableBody) {
+                console.error('Elemento tabella non trovato');
+                return;
+            }
+            
+            // Svuota la tabella
+            tableBody.innerHTML = '';
+            
+            // Distruggi DataTable se esiste
+            if (dataTable) {
+                try {
+                    dataTable.destroy();
+                } catch (e) {
+                    console.warn('Errore nel distruggere DataTable:', e);
+                }
+            }
+            
+            // Popola la tabella con i dati
+            contacts.forEach((contact, index) => {
+                const row = document.createElement('tr');
+                row.dataset.id = index;
+                
+                // Aggiungi le celle con i dati
+                row.innerHTML = `
+                    <td><input type="checkbox" class="contact-checkbox" data-id="${index}" ${contact.selected ? 'checked' : ''}></td>
+                    <td>${contact['Ragione Sociale'] || ''}</td>
+                    <td>${contact['Settore'] || ''}</td>
+                    <td>${contact['Email'] || ''}</td>
+                    <td>${contact['Telefono'] || ''}</td>
+                    <td>${contact['Città'] || ''}</td>
+                    <td><span class="status-badge status-${(contact['Stato'] || 'Non contattato').toLowerCase().replace(/ /g, '-')}">${contact['Stato'] || 'Non contattato'}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="showContactDetails(${index})" data-bs-toggle="tooltip" title="Visualizza dettagli">Dettagli</button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            // Inizializza DataTable
+            const tableElement = document.getElementById('contacts-table');
+            if (tableElement) {
+                try {
+                    dataTable = new DataTable('#contacts-table', {
+                        language: {
+                            url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/it-IT.json'
+                        },
+                        pageLength: 10,
+                        lengthMenu: [10, 25, 50, 100],
+                        order: [[1, 'asc']],
+                        columnDefs: [
+                            { orderable: false, targets: [0, 7] }
+                        ]
+                    });
+                } catch (e) {
+                    console.error('Errore nell\'inizializzazione di DataTable:', e);
+                }
+            }
+            
+            // Aggiungi event listeners per i checkbox
+            document.querySelectorAll('.contact-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const id = parseInt(this.dataset.id);
+                    contacts[id].selected = this.checked;
+                    updateSelectedCount();
+                    saveContacts();
+                });
+            });
+            
+            // Checkbox seleziona tutti
+            const selectAllCheckbox = document.getElementById('select-all-contacts');
+            if (selectAllCheckbox) {
+                selectAllCheckbox.addEventListener('change', function() {
+                    const isChecked = this.checked;
+                    document.querySelectorAll('.contact-checkbox').forEach(checkbox => {
+                        checkbox.checked = isChecked;
+                        const id = parseInt(checkbox.dataset.id);
+                        contacts[id].selected = isChecked;
+                    });
+                    updateSelectedCount();
+                    saveContacts();
+                });
+            }
+            
+            // Aggiorna il conteggio delle aziende selezionate
+            updateSelectedCount();
+            
+            // Aggiorna le statistiche e i grafici
+            updateStatistics();
+            try {
+                renderCharts();
+            } catch (e) {
+                console.error('Errore nel rendering dei grafici:', e);
+            }
+        }
+        
+        // Mostra i dettagli di un contatto
+        function showContactDetails(id) {
+            const contact = contacts[id];
+            if (!contact) {
+                console.error('Contatto non trovato:', id);
+                return;
+            }
+            
+            // Inizializza le interazioni se non esistono
+            if (!contact.interactions) {
+                contact.interactions = [];
+            }
+            
+            // Inizializza l'opportunità se non esiste
+            if (!contact.opportunity) {
+                contact.opportunity = {
+                    stage: '',
+                    data: {}
+                };
+            }
+            
+            // Popola i dettagli del contatto
+            const detailsContainer = document.getElementById('contact-details-container');
+            let detailsHTML = `
+                <h4>${contact['Ragione Sociale'] || 'N/D'}</h4>
+                <p class="text-muted">${contact['Settore'] || 'N/D'}</p>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="mb-2">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="contact-email" value="${contact['Email'] || ''}">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-2">
+                            <label class="form-label">Telefono</label>
+                            <input type="tel" class="form-control" id="contact-phone" value="${contact['Telefono'] || ''}">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="mb-2">
+                            <label class="form-label">Indirizzo</label>
+                            <input type="text" class="form-control" id="contact-address" value="${contact['Indirizzo'] || ''}">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-2">
+                            <label class="form-label">Città</label>
+                            <input type="text" class="form-control" id="contact-city" value="${contact['Città'] || ''}">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-2">
+                            <label class="form-label">Provincia</label>
+                            <input type="text" class="form-control" id="contact-province" value="${contact['Provincia'] || ''}">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="mb-2">
+                            <label class="form-label">Stato</label>
+                            <select class="form-select" id="contact-status">
+                                ${STATI.map(stato => `<option value="${stato}" ${contact['Stato'] === stato ? 'selected' : ''}>${stato}</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-2">
+                            <label class="form-label">Data Ultimo Contatto</label>
+                            <input type="date" class="form-control" id="contact-last-date" value="${contact['Data Ultimo Contatto'] || ''}">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Note</label>
+                    <textarea class="form-control" id="contact-notes" rows="3">${contact['Note'] || ''}</textarea>
+                </div>
+            `;
+            
+            detailsContainer.innerHTML = detailsHTML;
+            
+            // Popola la timeline
+            renderTimeline(contact);
+            
+            // Imposta lo stato dell'opportunità
+            const opportunityStage = document.getElementById('opportunity-stage');
+            opportunityStage.value = contact.opportunity.stage || '';
+            
+            // Mostra i dettagli dell'opportunità in base allo stage
+            updateOpportunityStageDisplay(contact.opportunity);
+            
+            // Aggiungi event listener per il cambio di stage
+            opportunityStage.addEventListener('change', function() {
+                const stage = this.value;
+                contact.opportunity.stage = stage;
+                updateOpportunityStageDisplay(contact.opportunity);
+            });
+            
+            // Mostra il modal
+            const modal = new bootstrap.Modal(document.getElementById('contact-details-modal'));
+            modal.show();
+            
+            // Event listener per salvare le modifiche
+            document.getElementById('save-contact-details').addEventListener('click', function() {
+                saveContactDetails(id);
+            });
+            
+            // Event listener per aggiungere interazioni
+            document.getElementById('add-interaction').addEventListener('click', function() {
+                addInteraction(id);
+            });
+            
+            // Event listener per salvare l'opportunità
+            document.getElementById('save-opportunity').addEventListener('click', function() {
+                saveOpportunity(id);
+            });
+            
+            // Event listener per arricchire i dati
+            document.getElementById('enrich-data-btn').addEventListener('click', function() {
+                enrichCompanyData(id);
+            });
+            
+            // Event listener per cercare notizie
+            document.getElementById('fetch-news-btn').addEventListener('click', function() {
+                fetchCompanyNews(id);
+            });
+        }
+        
+        // Funzione per renderizzare la timeline
+        function renderTimeline(contact) {
+            const timelineContainer = document.getElementById('contact-timeline');
+            timelineContainer.innerHTML = '';
+            
+            if (!contact.interactions || contact.interactions.length === 0) {
+                timelineContainer.innerHTML = '<p class="text-muted">Nessuna interazione registrata</p>';
+                return;
+            }
+            
+            // Ordina le interazioni per data (più recenti prima)
+            const sortedInteractions = [...contact.interactions].sort((a, b) => {
+                return new Date(b.date) - new Date(a.date);
+            });
+            
+            sortedInteractions.forEach(interaction => {
+                const date = new Date(interaction.date);
+                const formattedDate = date.toLocaleDateString('it-IT') + ' ' + date.toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'});
+                
+                let iconClass = '';
+                switch(interaction.type) {
+                    case 'email': iconClass = 'fa-envelope'; break;
+                    case 'call': iconClass = 'fa-phone'; break;
+                    case 'meeting': iconClass = 'fa-users'; break;
+                    case 'note': iconClass = 'fa-sticky-note'; break;
+                    default: iconClass = 'fa-comment';
+                }
+                
+                const interactionElement = document.createElement('div');
+                interactionElement.className = 'timeline-item mb-3';
+                interactionElement.innerHTML = `
+                    <div class="d-flex">
+                        <div class="timeline-icon me-2">
+                            <i class="fas ${iconClass} text-primary"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <div class="d-flex justify-content-between">
+                                <strong>${interaction.type.charAt(0).toUpperCase() + interaction.type.slice(1)}</strong>
+                                <small class="text-muted">${formattedDate}</small>
+                            </div>
+                            <p class="mb-0">${interaction.notes}</p>
+                        </div>
+                    </div>
+                `;
+                
+                timelineContainer.appendChild(interactionElement);
+            });
+        }
+        
+        // Funzione per aggiungere un'interazione
+        function addInteraction(contactId) {
+            const contact = contacts[contactId];
+            if (!contact) return;
+            
+            const type = document.getElementById('interaction-type').value;
+            const notes = document.getElementById('interaction-notes').value.trim();
+            
+            if (!notes) {
+                alert('Inserisci una descrizione per l\'interazione');
+                return;
+            }
+            
+            // Inizializza le interazioni se non esistono
+            if (!contact.interactions) {
+                contact.interactions = [];
+            }
+            
+            // Aggiungi la nuova interazione
+            contact.interactions.push({
+                type: type,
+                notes: notes,
+                date: new Date().toISOString()
+            });
+            
+            // Aggiorna la data dell'ultimo contatto
+            contact['Data Ultimo Contatto'] = new Date().toISOString().split('T')[0];
+            
+            // Aggiorna la timeline
+            renderTimeline(contact);
+            
+            // Resetta il form
+            document.getElementById('interaction-notes').value = '';
+            
+            // Salva i contatti
+            saveContacts();
+        }
+        
+        // Funzione per aggiornare la visualizzazione dello stage dell'opportunità
+        function updateOpportunityStageDisplay(opportunity) {
+            // Nascondi tutti gli stage
+            document.querySelectorAll('.opportunity-stage').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // Mostra lo stage selezionato
+            const stage = opportunity.stage;
+            if (stage) {
+                const stageElement = document.querySelector(`.opportunity-stage.stage-${stage}`);
+                if (stageElement) {
+                    stageElement.style.display = 'block';
+                    
+                    // Popola i campi con i dati salvati
+                    if (opportunity.data) {
+                        if (stage === 'proposal') {
+                            document.getElementById('proposal-value').value = opportunity.data.value || '';
+                            document.getElementById('proposal-date').value = opportunity.data.date || '';
+                        } else if (stage === 'negotiation') {
+                            document.getElementById('negotiation-notes').value = opportunity.data.notes || '';
+                        } else if (stage === 'closed-won') {
+                            document.getElementById('final-value').value = opportunity.data.finalValue || '';
+                            document.getElementById('closing-date').value = opportunity.data.closingDate || '';
+                        } else if (stage === 'closed-lost') {
+                            document.getElementById('loss-reason').value = opportunity.data.reason || 'prezzo';
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Funzione per salvare i dati dell'opportunità
+        function saveOpportunity(contactId) {
+            const contact = contacts[contactId];
+            if (!contact) return;
+            
+            const stage = document.getElementById('opportunity-stage').value;
+            
+            // Salva i dati specifici dello stage
+            let stageData = {};
+            if (stage === 'proposal') {
+                stageData = {
+                    value: document.getElementById('proposal-value').value,
+                    date: document.getElementById('proposal-date').value
+                };
+            } else if (stage === 'negotiation') {
+                stageData = {
+                    notes: document.getElementById('negotiation-notes').value
+                };
+            } else if (stage === 'closed-won') {
+                stageData = {
+                    finalValue: document.getElementById('final-value').value,
+                    closingDate: document.getElementById('closing-date').value
+                };
+                
+                // Aggiorna lo stato del contatto a Cliente acquisito
+                contact['Stato'] = 'Cliente acquisito';
+                document.getElementById('contact-status').value = 'Cliente acquisito';
+            } else if (stage === 'closed-lost') {
+                stageData = {
+                    reason: document.getElementById('loss-reason').value
+                };
+                
+                // Aggiorna lo stato del contatto a Non interessato
+                contact['Stato'] = 'Non interessato';
+                document.getElementById('contact-status').value = 'Non interessato';
+            }
+            
+            // Aggiorna l'opportunità
+            contact.opportunity = {
+                stage: stage,
+                data: stageData
+            };
+            
+            // Aggiungi un'interazione per tracciare il cambio di fase
+            if (stage) {
+                if (!contact.interactions) {
+                    contact.interactions = [];
+                }
+                
+                let stageLabel = '';
+                switch(stage) {
+                    case 'lead': stageLabel = 'Lead'; break;
+                    case 'qualified': stageLabel = 'Qualificato'; break;
+                    case 'proposal': stageLabel = 'Proposta'; break;
+                    case 'negotiation': stageLabel = 'Negoziazione'; break;
+                    case 'closed-won': stageLabel = 'Chiuso (Vinto)'; break;
+                    case 'closed-lost': stageLabel = 'Chiuso (Perso)'; break;
+                }
+                
+                contact.interactions.push({
+                    type: 'note',
+                    notes: `Opportunità aggiornata a: ${stageLabel}`,
+                    date: new Date().toISOString()
+                });
+                
+                // Aggiorna la timeline
+                renderTimeline(contact);
+            }
+            
+            // Salva i contatti
+            saveContacts();
+            
+            alert('Opportunità salvata con successo!');
+        }
+        
+        // Funzione per salvare i dettagli del contatto
+        function saveContactDetails(id) {
+            const contact = contacts[id];
+            if (!contact) return;
+            
+            // Aggiorna i dati del contatto
+            contact['Email'] = document.getElementById('contact-email').value;
+            contact['Telefono'] = document.getElementById('contact-phone').value;
+            contact['Indirizzo'] = document.getElementById('contact-address').value;
+            contact['Città'] = document.getElementById('contact-city').value;
+            contact['Provincia'] = document.getElementById('contact-province').value;
+            contact['Stato'] = document.getElementById('contact-status').value;
+            contact['Data Ultimo Contatto'] = document.getElementById('contact-last-date').value;
+            contact['Note'] = document.getElementById('contact-notes').value;
+            
+            // Salva i contatti
+            saveContacts();
+            
+            // Aggiorna la tabella
+            if (dataTable) {
+                try {
+                    dataTable.destroy();
+                } catch (e) {
+                    console.warn('Errore nel distruggere DataTable:', e);
+                }
+            }
+            renderContacts();
+            
+            // Chiudi il modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('contact-details-modal'));
+            modal.hide();
+            
+            alert('Dettagli contatto salvati con successo!');
+        }
+        
+        // Aggiorna le statistiche
+        function updateStatistics() {
+            const totalContacts = contacts.length;
+            const contactedCount = contacts.filter(c => c['Stato'] !== 'Non contattato').length;
+            const responseCount = contacts.filter(c => c['Stato'] === 'Risposta ricevuta' || c['Stato'] === 'Cliente potenziale' || c['Stato'] === 'Cliente acquisito').length;
+            const responseRate = totalContacts > 0 ? (responseCount / contactedCount * 100).toFixed(1) : 0;
+            
+            const statsContainer = document.getElementById('stats-container');
+            statsContainer.innerHTML = `
+                <p><strong>Totale contatti:</strong> ${totalContacts}</p>
+                <p><strong>Contatti email:</strong> ${contacts.filter(c => c['Email'] && c['Email'].trim() !== '').length}</p>
+                <p><strong>Contatti con sito web:</strong> ${contacts.filter(c => c['Sito Web'] && c['Sito Web'].trim() !== '').length}</p>
+                <hr>
+                <p><strong>Contattati:</strong> ${contactedCount} (${(contactedCount / totalContacts * 100).toFixed(1)}%)</p>
+                <p><strong>Risposte ricevute:</strong> ${responseCount}</p>
+                <p><strong>Tasso di risposta:</strong> ${contactedCount > 0 ? responseRate : 0}%</p>
+                <p><strong>Clienti potenziali:</strong> ${contacts.filter(c => c['Stato'] === 'Cliente potenziale').length}</p>
+                <p><strong>Clienti acquisiti:</strong> ${contacts.filter(c => c['Stato'] === 'Cliente acquisito').length}</p>
+            `;
+        }
+        
+        // Renderizza i grafici
+        function renderCharts() {
+            try {
+                // Grafico dello stato dei contatti
+                const statusCounts = {};
+                contacts.forEach(contact => {
+                    const status = contact['Stato'] || 'Non contattato';
+                    statusCounts[status] = (statusCounts[status] || 0) + 1;
+                });
+                
+                const statusLabels = Object.keys(statusCounts);
+                const statusData = Object.values(statusCounts);
+                
+                // Distruggi il grafico esistente se presente
+                if (statusChart) {
+                    statusChart.destroy();
+                }
+                
+                const statusChartElement = document.getElementById('status-chart');
+                if (statusChartElement) {
+                    statusChart = new Chart(statusChartElement, {
+                        type: 'pie',
+                        data: {
+                            labels: statusLabels,
+                            datasets: [{
+                                data: statusData,
+                                backgroundColor: STATUS_COLORS,
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'right',
+                                    labels: {
+                                        boxWidth: 15,
+                                        font: {
+                                            size: 11
+                                        }
+                                    }
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.label || '';
+                                            const value = context.raw || 0;
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const percentage = Math.round((value / total) * 100);
+                                            return `${label}: ${value} (${percentage}%)`;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                // Grafico dei settori
+                const sectorCounts = {};
+                contacts.forEach(contact => {
+                    const sector = contact['Settore'] || 'Non specificato';
+                    sectorCounts[sector] = (sectorCounts[sector] || 0) + 1;
+                });
+                
+                // Prendi solo i top 10 settori
+                const sortedSectors = Object.entries(sectorCounts)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 10);
+                
+                const sectorLabels = sortedSectors.map(item => item[0]);
+                const sectorData = sortedSectors.map(item => item[1]);
+                
+                // Distruggi il grafico esistente se presente
+                if (sectorsChart) {
+                    sectorsChart.destroy();
+                }
+                
+                const sectorsChartElement = document.getElementById('sectors-chart');
+                if (sectorsChartElement) {
+                    sectorsChart = new Chart(sectorsChartElement, {
+                        type: 'bar',
+                        data: {
+                            labels: sectorLabels,
+                            datasets: [{
+                                label: 'Numero di contatti',
+                                data: sectorData,
+                                backgroundColor: SECTOR_COLORS,
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            indexAxis: 'y',
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        precision: 0
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                // NUOVO: Grafico distribuzione geografica
+                const provinceCounts = {};
+                contacts.forEach(contact => {
+                    const provincia = contact['Provincia'] || 'Non specificata';
+                    provinceCounts[provincia] = (provinceCounts[provincia] || 0) + 1;
+                });
+                
+                // Prendi solo le top 10 province
+                const sortedProvinces = Object.entries(provinceCounts)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 10);
+                
+                const provinceLabels = sortedProvinces.map(item => item[0]);
+                const provinceData = sortedProvinces.map(item => item[1]);
+                
+                const geoChartElement = document.getElementById('geo-chart');
+                if (geoChartElement) {
+                    new Chart(geoChartElement, {
+                        type: 'doughnut',
+                        data: {
+                            labels: provinceLabels,
+                            datasets: [{
+                                data: provinceData,
+                                backgroundColor: SECTOR_COLORS,
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'right',
+                                    labels: {
+                                        boxWidth: 15,
+                                        font: {
+                                            size: 11
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                // NUOVO: Grafico dimensione aziende (per numero dipendenti)
+                const sizeCategories = {
+                    'Micro (1-9)': 0,
+                    'Piccola (10-49)': 0,
+                    'Media (50-249)': 0,
+                    'Grande (250+)': 0
+                };
+                
+                contacts.forEach(contact => {
+                    const dipendenti = parseInt(contact['Dipendenti']) || 0;
+                    if (dipendenti >= 250) {
+                        sizeCategories['Grande (250+)']++;
+                    } else if (dipendenti >= 50) {
+                        sizeCategories['Media (50-249)']++;
+                    } else if (dipendenti >= 10) {
+                        sizeCategories['Piccola (10-49)']++;
+                    } else {
+                        sizeCategories['Micro (1-9)']++;
+                    }
+                });
+                
+                const sizeLabels = Object.keys(sizeCategories);
+                const sizeData = Object.values(sizeCategories);
+                
+                const sizeChartElement = document.getElementById('size-chart');
+                if (sizeChartElement) {
+                    new Chart(sizeChartElement, {
+                        type: 'pie',
+                        data: {
+                            labels: sizeLabels,
+                            datasets: [{
+                                data: sizeData,
+                                backgroundColor: STATUS_COLORS,
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'right',
+                                    labels: {
+                                        boxWidth: 15,
+                                        font: {
+                                            size: 11
+                                        }
+                                    }
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.label || '';
+                                            const value = context.raw || 0;
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const percentage = Math.round((value / total) * 100);
+                                            return `${label}: ${value} (${percentage}%)`;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Errore nel rendering dei grafici:', error);
+            }
+        }
+        
+        // Invia email a un contatto
+        function sendEmail(id) {
+            const contact = contacts[id];
+            const subject = document.getElementById('email-subject').value
+                .replace('[Nome Azienda]', contact['Ragione Sociale'] || '');
+            const body = document.getElementById('email-body').value
+                .replace('[Nome Azienda]', contact['Ragione Sociale'] || '')
+                .replace('[Settore]', contact['Settore'] || '');
+            
+            window.location.href = `mailto:${contact['Email']}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            
+            // Aggiorna lo stato
+            contact['Stato'] = 'Email inviata';
+            contact['Data contatto'] = new Date().toISOString().split('T')[0];
+            saveContacts();
+            renderContacts();
+            updateStatistics();
+            renderCharts();
+            
+            // Chiudi il modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('contact-detail-modal'));
+            modal.hide();
+        }
+        
+        // Esporta contatti in CSV
+        function exportContacts() {
+            const headers = Object.keys(contacts[0]).join(',');
+            const rows = contacts.map(contact => {
+                return Object.values(contact).map(value => 
+                    `"${value ? value.toString().replace(/"/g, '""') : ''}"`
+                ).join(',');
+            }).join('\n');
+            
+            const csvContent = 'data:text/csv;charset=utf-8,' + headers + '\n' + rows;
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', `pmi_contatti_export_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // Salva i contatti nel localStorage
+        function saveContacts() {
+            localStorage.setItem('pmi_contacts', JSON.stringify(contacts));
+        }
+        
+        // Aggiorna il conteggio delle aziende selezionate
+        function updateSelectedCount() {
+            const selectedCount = contacts.filter(contact => contact.selected).length;
+            const selectedCountElement = document.getElementById('selected-count');
+            if (selectedCountElement) {
+                selectedCountElement.textContent = `${selectedCount} aziende selezionate`;
+            }
+            
+            // Abilita/disabilita il pulsante di lancio campagna
+            const launchCampaignBtn = document.getElementById('launch-campaign-btn');
+            if (launchCampaignBtn) {
+                launchCampaignBtn.disabled = selectedCount === 0;
+            }
+        }
+        
+        // Invia email a più contatti (campagna)
+        function launchCampaign() {
+            const selectedContacts = contacts.filter(contact => contact.selected);
+            if (selectedContacts.length === 0) {
+                alert('Seleziona almeno un contatto per lanciare la campagna');
+                return;
+            }
+            
+            const subject = document.getElementById('email-subject').value;
+            const body = document.getElementById('email-body').value;
+            
+            // Conferma prima di inviare
+            if (!confirm(`Sei sicuro di voler inviare questa email a ${selectedContacts.length} contatti?`)) {
+                return;
+            }
+            
+            // Prepara i destinatari
+            const recipients = selectedContacts.map(contact => contact['Email']).join(',');
+            
+            // Apri il client email con tutti i destinatari
+            window.location.href = `mailto:?bcc=${encodeURIComponent(recipients)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            
+            // Aggiorna lo stato dei contatti
+            const now = new Date().toISOString().split('T')[0];
+            selectedContacts.forEach(contact => {
+                const index = contacts.findIndex(c => c === contact);
+                if (index !== -1) {
+                    contacts[index]['Stato'] = 'Email inviata';
+                    contacts[index]['Data contatto'] = now;
+                    contacts[index].selected = false; // Deseleziona dopo l'invio
+                }
+            });
+            
+            // Salva, aggiorna la tabella e le statistiche
+            saveContacts();
+            renderContacts();
+            updateStatistics();
+            renderCharts();
+            
+            // Aggiorna il conteggio
+            updateSelectedCount();
+        }
+        
+        // Funzione per popolare i filtri
+        function populateFilters() {
+            // Raccogli valori unici per i filtri
+            const sectors = new Set();
+            const provinces = new Set();
+            
+            contacts.forEach(contact => {
+                if (contact['Settore']) sectors.add(contact['Settore']);
+                if (contact['Provincia']) provinces.add(contact['Provincia']);
+            });
+            
+            // Popola i dropdown dei filtri
+            const sectorFilter = document.getElementById('filter-sector');
+            const provinceFilter = document.getElementById('filter-province');
+            
+            sectorFilter.innerHTML = '<option value="">Tutti i settori</option>';
+            provinceFilter.innerHTML = '<option value="">Tutte le province</option>';
+            
+            [...sectors].sort().forEach(sector => {
+                const option = document.createElement('option');
+                option.value = sector;
+                option.textContent = sector;
+                sectorFilter.appendChild(option);
+            });
+            
+            [...provinces].sort().forEach(province => {
+                const option = document.createElement('option');
+                option.value = province;
+                option.textContent = province;
+                provinceFilter.appendChild(option);
+            });
+        }
+        
+        // Funzione per applicare i filtri
+        function applyFilters() {
+            const sector = document.getElementById('filter-sector').value;
+            const province = document.getElementById('filter-province').value;
+            const status = document.getElementById('filter-status').value;
+            const size = document.getElementById('filter-size').value;
+            
+            // Salva i filtri attivi
+            activeFilters = {};
+            if (sector) activeFilters.sector = sector;
+            if (province) activeFilters.province = province;
+            if (status) activeFilters.status = status;
+            if (size) activeFilters.size = size;
+            
+            // Filtra i contatti
+            filteredContacts = contacts.filter(contact => {
+                let match = true;
+                
+                if (sector && contact['Settore'] !== sector) match = false;
+                if (province && contact['Provincia'] !== province) match = false;
+                if (status && contact['Stato'] !== status) match = false;
+                
+                if (size) {
+                    const dipendenti = parseInt(contact['Dipendenti']) || 0;
+                    if (size === 'micro' && (dipendenti < 1 || dipendenti > 9)) match = false;
+                    if (size === 'piccola' && (dipendenti < 10 || dipendenti > 49)) match = false;
+                    if (size === 'media' && (dipendenti < 50 || dipendenti > 249)) match = false;
+                    if (size === 'grande' && dipendenti < 250) match = false;
+                }
+                
+                return match;
+            });
+            
+            // Aggiorna la visualizzazione dei filtri attivi
+            updateActiveFiltersDisplay();
+            
+            // Aggiorna la tabella con i contatti filtrati
+            if (dataTable) {
+                try {
+                    dataTable.destroy();
+                } catch (e) {
+                    console.warn('Errore nel distruggere DataTable:', e);
+                }
+            }
+            
+            renderFilteredContacts();
+        }
+        
+        // Funzione per aggiornare la visualizzazione dei filtri attivi
+        function updateActiveFiltersDisplay() {
+            const activeFiltersContainer = document.getElementById('active-filters');
+            activeFiltersContainer.innerHTML = '';
+            
+            if (Object.keys(activeFilters).length === 0) {
+                activeFiltersContainer.innerHTML = '<span class="text-muted">Nessun filtro attivo</span>';
+                return;
+            }
+            
+            for (const [key, value] of Object.entries(activeFilters)) {
+                let label = '';
+                switch (key) {
+                    case 'sector': label = 'Settore'; break;
+                    case 'province': label = 'Provincia'; break;
+                    case 'status': label = 'Stato'; break;
+                    case 'size': 
+                        label = 'Dimensione'; 
+                        let sizeLabel = '';
+                        switch (value) {
+                            case 'micro': sizeLabel = 'Micro (1-9)'; break;
+                            case 'piccola': sizeLabel = 'Piccola (10-49)'; break;
+                            case 'media': sizeLabel = 'Media (50-249)'; break;
+                            case 'grande': sizeLabel = 'Grande (250+)'; break;
+                        }
+                        
+                        const filterTag = document.createElement('div');
+                        filterTag.className = 'tag tag-removable me-2';
+                        filterTag.innerHTML = `${label}: ${sizeLabel} <i class="fas fa-times ms-1" data-filter="${key}"></i>`;
+                        activeFiltersContainer.appendChild(filterTag);
+                        continue;
+                }
+                
+                const filterTag = document.createElement('div');
+                filterTag.className = 'tag tag-removable me-2';
+                filterTag.innerHTML = `${label}: ${value} <i class="fas fa-times ms-1" data-filter="${key}"></i>`;
+                activeFiltersContainer.appendChild(filterTag);
+            }
+            
+            // Aggiungi event listener per rimuovere i filtri
+            document.querySelectorAll('.tag-removable i').forEach(icon => {
+                icon.addEventListener('click', function() {
+                    const filterKey = this.dataset.filter;
+                    delete activeFilters[filterKey];
+                    
+                    // Reset del filtro corrispondente nella UI
+                    document.getElementById(`filter-${filterKey}`).value = '';
+                    
+                    // Riapplica i filtri
+                    applyFilters();
+                });
+            });
+        }
+        
+        // Funzione per renderizzare i contatti filtrati
+        function renderFilteredContacts() {
+            const tableBody = document.querySelector('#contacts-table tbody');
+            if (!tableBody) {
+                console.error('Elemento tabella non trovato');
+                return;
+            }
+            
+            // Svuota la tabella
+            tableBody.innerHTML = '';
+            
+            // Usa i contatti filtrati se ci sono filtri attivi, altrimenti usa tutti i contatti
+            const contactsToRender = Object.keys(activeFilters).length > 0 ? filteredContacts : contacts;
+            
+            // Popola la tabella con i dati
+            contactsToRender.forEach((contact, index) => {
+                const originalIndex = contacts.findIndex(c => c === contact);
+                const row = document.createElement('tr');
+                row.dataset.id = originalIndex;
+                
+                // Aggiungi le celle con i dati
+                row.innerHTML = `
+                    <td><input type="checkbox" class="contact-checkbox" data-id="${originalIndex}" ${contact.selected ? 'checked' : ''}></td>
+                    <td>${contact['Ragione Sociale'] || ''}</td>
+                    <td>${contact['Settore'] || ''}</td>
+                    <td>${contact['Email'] || ''}</td>
+                    <td>${contact['Telefono'] || ''}</td>
+                    <td>${contact['Città'] || ''}</td>
+                    <td><span class="status-badge status-${(contact['Stato'] || 'Non contattato').toLowerCase().replace(/ /g, '-')}">${contact['Stato'] || 'Non contattato'}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="showContactDetails(${originalIndex})" data-bs-toggle="tooltip" title="Visualizza dettagli">Dettagli</button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            // Inizializza DataTable
+            const tableElement = document.getElementById('contacts-table');
+            if (tableElement) {
+                try {
+                    dataTable = new DataTable('#contacts-table', {
+                        language: {
+                            url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/it-IT.json'
+                        },
+                        pageLength: 10,
+                        lengthMenu: [10, 25, 50, 100],
+                        order: [[1, 'asc']],
+                        columnDefs: [
+                            { orderable: false, targets: [0, 7] }
+                        ]
+                    });
+                } catch (e) {
+                    console.error('Errore nell\'inizializzazione di DataTable:', e);
+                }
+            }
+            
+            // Aggiungi event listeners per i checkbox
+            document.querySelectorAll('.contact-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const id = parseInt(this.dataset.id);
+                    contacts[id].selected = this.checked;
+                    updateSelectedCount();
+                    saveContacts();
+                });
+            });
+            
+            // Checkbox seleziona tutti
+            const selectAllCheckbox = document.getElementById('select-all-contacts');
+            if (selectAllCheckbox) {
+                selectAllCheckbox.checked = false; // Reset dello stato
+                selectAllCheckbox.addEventListener('change', function() {
+                    const isChecked = this.checked;
+                    document.querySelectorAll('.contact-checkbox').forEach(checkbox => {
+                        checkbox.checked = isChecked;
+                        const id = parseInt(checkbox.dataset.id);
+                        contacts[id].selected = isChecked;
+                    });
+                    updateSelectedCount();
+                    saveContacts();
+                });
+            }
+            
+            // Aggiorna il conteggio delle aziende selezionate
+            updateSelectedCount();
+            
+            // Aggiorna le statistiche e i grafici
+            updateStatistics();
+            try {
+                renderCharts();
+            } catch (e) {
+                console.error('Errore nel rendering dei grafici:', e);
+            }
+        }
+        
+        // Inizializza l'app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadContacts();
+            
+            // Event listeners per i filtri
+            document.getElementById('apply-filters-btn').addEventListener('click', applyFilters);
+            document.getElementById('reset-filters-btn').addEventListener('click', function() {
+                // Reset dei filtri
+                document.getElementById('filter-sector').value = '';
+                document.getElementById('filter-province').value = '';
+                document.getElementById('filter-status').value = '';
+                document.getElementById('filter-size').value = '';
+                
+                // Svuota i filtri attivi
+                activeFilters = {};
+                
+                // Aggiorna la visualizzazione
+                updateActiveFiltersDisplay();
+                renderContacts();
+            });
+            
+            // Cambio tema
+            const themeSwitch = document.getElementById('theme-switch');
+            themeSwitch.addEventListener('click', function() {
+                const body = document.body;
+                if (body.classList.contains('dark-mode')) {
+                    body.classList.remove('dark-mode');
+                    this.innerHTML = '<i class="fas fa-moon"></i>';
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    body.classList.add('dark-mode');
+                    this.innerHTML = '<i class="fas fa-sun"></i>';
+                    localStorage.setItem('theme', 'dark');
+                }
+            });
+            
+            // Carica il tema salvato
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                themeSwitch.innerHTML = '<i class="fas fa-sun"></i>';
+            }
+            
+            // Event listeners
+            document.getElementById('campaign-btn').addEventListener('click', function() {
+                const templateContainer = document.getElementById('email-template-container');
+                if (templateContainer.style.display === 'none' || templateContainer.style.display === '') {
+                    templateContainer.style.display = 'block';
+                    this.textContent = 'Nascondi Campagna';
+                    this.classList.remove('btn-warning');
+                    this.classList.add('btn-secondary');
+                } else {
+                    templateContainer.style.display = 'none';
+                    this.textContent = 'Campagna Email';
+                    this.classList.remove('btn-secondary');
+                    this.classList.add('btn-warning');
+                }
+            });
+            
+            document.getElementById('preview-email-btn').addEventListener('click', function() {
+                const subject = document.getElementById('email-subject').value;
+                const body = document.getElementById('email-body').value;
+                
+                // Crea un modal per l'anteprima
+                const previewModal = new bootstrap.Modal(document.getElementById('email-preview-modal'));
+                document.getElementById('preview-subject').textContent = subject;
+                document.getElementById('preview-body').innerHTML = body.replace(/\n/g, '<br>');
+                previewModal.show();
+            });
+            
+            // Listener per il pulsante di lancio campagna
+            document.getElementById('launch-campaign-btn').addEventListener('click', launchCampaign);
+            
+            document.getElementById('export-btn').addEventListener('click', exportContacts);
+            
+            // Inizializza la tabella delle campagne social
+            initSocialCampaignsTable();
+            
+            // Inizializza il form per la creazione di campagne social
+            setupSocialCampaignForm();
+        });
+        
+        // Funzione per simulare i risultati del web scraping
+        function simulateScrapingResults(location, sector, size, count) {
+            // Questa funzione simula i risultati che otterresti da pmi_scraper_custom.py
+            // In un'app reale, questi dati verrebbero dal tuo backend
+            
+            const results = [];
+            
+            // Settori disponibili
+            const settori = [
+                "Tecnologia", "Manifatturiero", "Servizi", "Commercio", "Edilizia",
+                "Ristorazione", "Turismo", "Agricoltura", "Trasporti", "Sanità"
+            ];
+            
+            // Filtra i settori se specificato
+            const settoriFiltrati = sector ? [sector] : settori;
+            
+            // Province italiane
+            const province = [
+                "Milano", "Roma", "Napoli", "Torino", "Palermo", "Genova", "Bologna",
+                "Firenze", "Bari", "Catania", "Venezia", "Verona", "Padova", "Brescia"
+            ];
+            
+            // Filtra le province se specificata una località
+            const provinceFiltrate = location ? 
+                province.filter(p => p.toLowerCase().includes(location.toLowerCase())) : 
+                province;
+            
+            // Se non ci sono province filtrate ma è stata specificata una località, usa la località come provincia
+            const provinceUsate = provinceFiltrate.length > 0 ? provinceFiltrate : (location ? [location] : province);
+            
+            // Prefissi nomi aziende per settore
+            const prefissiPerSettore = {
+                "Tecnologia": ["Tech", "Digital", "Soft", "Net", "Web", "Cyber", "Data", "Smart", "App"],
+                "Manifatturiero": ["Mec", "Ind", "Prod", "Metal", "Plast", "Tec", "Fabbrica", "Lav"],
+                "Servizi": ["Serv", "Consult", "Pro", "Support", "Assist", "Help", "Care", "Gest"],
+                "Commercio": ["Market", "Shop", "Store", "Emporio", "Ingrosso", "Distrib", "Import", "Export"],
+                "Edilizia": ["Costruzioni", "Edil", "Build", "Casa", "Immobil", "Progett", "Arch", "Ristrutt"],
+                "Ristorazione": ["Food", "Gusto", "Sapore", "Cucina", "Delizie", "Chef", "Ristoro", "Tavola"],
+                "Turismo": ["Travel", "Tour", "Visit", "Holiday", "Vacanze", "Trip", "Journey", "Viaggi"],
+                "Agricoltura": ["Agri", "Farm", "Terra", "Natura", "Bio", "Eco", "Green", "Coltura"],
+                "Trasporti": ["Trans", "Log", "Move", "Ship", "Delivery", "Express", "Trasfer", "Spedizioni"],
+                "Sanità": ["Med", "Health", "Care", "Salute", "Vita", "Benessere", "Clinic", "Pharma"]
+            };
+            
+            // Suffissi comuni per nomi aziende
+            const suffissi = ["Srl", "Spa", "Snc", "Sas", "Srls", "Group", "Italia", "International"];
+            
+            // Dimensioni aziende
+            const dimensioni = {
+                "micro": {"dipendenti": [1, 9], "fatturato": [0.1, 2]},
+                "piccola": {"dipendenti": [10, 49], "fatturato": [2, 10]},
+                "media": {"dipendenti": [50, 249], "fatturato": [10, 50]},
+                "grande": {"dipendenti": [250, 1000], "fatturato": [50, 500]}
+            };
+            
+            // Filtra per dimensione se specificata
+            const dimensioniFiltrate = size ? [size] : Object.keys(dimensioni);
+            
+            // Genera i risultati
+            for (let i = 0; i < count; i++) {
+                // Scegli un settore casuale tra quelli filtrati
+                const settore = settoriFiltrati[Math.floor(Math.random() * settoriFiltrati.length)];
+                
+                // Scegli una provincia casuale tra quelle filtrate
+                const provincia = provinceUsate[Math.floor(Math.random() * provinceUsate.length)];
+                
+                // Genera un nome aziendale plausibile basato sul settore
+                const prefissi = prefissiPerSettore[settore] || ["Azienda", "Impresa", "Società"];
+                let nomeBase = prefissi[Math.floor(Math.random() * prefissi.length)];
+                nomeBase += Math.random() > 0.5 ? " " : "";
+                
+                // Aggiungi un suffisso casuale
+                const nome = nomeBase + " " + suffissi[Math.floor(Math.random() * suffissi.length)];
+                
+                // Scegli una dimensione casuale tra quelle filtrate
+                const dimKey = dimensioniFiltrate[Math.floor(Math.random() * dimensioniFiltrate.length)];
+                const dimRange = dimensioni[dimKey];
+                
+                // Genera il numero di dipendenti e il fatturato in base alla dimensione
+                const dipendenti = Math.floor(Math.random() * (dimRange.dipendenti[1] - dimRange.dipendenti[0] + 1)) + dimRange.dipendenti[0];
+                const fatturato = (Math.random() * (dimRange.fatturato[1] - dimRange.fatturato[0]) + dimRange.fatturato[0]).toFixed(1);
+                
+                // Genera un indirizzo plausibile
+                const vie = ["Via Roma", "Via Milano", "Via Napoli", "Via Torino", "Via Garibaldi", "Via Dante", "Via Mazzini"];
+                const indirizzo = `${vie[Math.floor(Math.random() * vie.length)]}, ${Math.floor(Math.random() * 100) + 1}`;
+                const cap = `${Math.floor(Math.random() * 90) + 10}0${Math.floor(Math.random() * 90) + 10}`;
+                
+                // Genera un'email aziendale plausibile
+                const dominio = nomeBase.toLowerCase().replace(" ", "") + ".it";
+                const email = `info@${dominio}`;
+                
+                // Genera un numero di telefono plausibile
+                const telefono = `+39 0${Math.floor(Math.random() * 90) + 10} ${Math.floor(Math.random() * 900000) + 100000}`;
+                
+                // Genera un sito web plausibile
+                const sitoWeb = `https://www.${dominio}`;
+                
+                // Crea il risultato
+                results.push({
+                    'Ragione Sociale': nome,
+                    'Settore': settore,
+                    'Email': email,
+                    'Telefono': telefono,
+                    'Indirizzo': indirizzo,
+                    'Città': provincia,
+                    'Provincia': provincia,
+                    'CAP': cap,
+                    'Sito Web': sitoWeb,
+                    'Dipendenti': dipendenti,
+                    'Fatturato': `${fatturato}M €`,
+                    'Stato': 'Non contattato',
+                    'Data Ultimo Contatto': '',
+                    'Data Risposta': '',
+                    'Interazioni': [],
+                    'Opportunità': {
+                        'Fase': '',
+                        'Dati': {}
+                    }
+                });
+            }
+            
+            return results;
+        }
+        
+        // Funzione per visualizzare i risultati del web scraping
+        function displayScrapingResults(results) {
+            const resultsContainer = document.getElementById('scraping-results-content');
+            
+            if (results.length === 0) {
+                resultsContainer.innerHTML = '<p class="text-center">Nessun risultato trovato.</p>';
+                return;
+            }
+            
+            let html = `<p>Trovate ${results.length} aziende:</p>`;
+            html += '<div class="table-responsive"><table class="table table-sm table-striped"><thead><tr>';
+            html += '<th><input type="checkbox" id="select-all-results"></th>';
+            html += '<th>Ragione Sociale</th><th>Settore</th><th>Email</th><th>Telefono</th><th>Città</th></tr></thead><tbody>';
+            
+            results.forEach((result, index) => {
+                html += `<tr>
+                    <td><input type="checkbox" class="result-checkbox" data-index="${index}" checked></td>
+                    <td>${result['Ragione Sociale']}</td>
+                    <td>${result['Settore']}</td>
+                    <td>${result['Email']}</td>
+                    <td>${result['Telefono']}</td>
+                    <td>${result['Città']}</td>
+                </tr>`;
+            });
+            
+            html += '</tbody></table></div>';
+            
+            resultsContainer.innerHTML = html;
+            
+            // Event listener per il checkbox "seleziona tutti"
+            document.getElementById('select-all-results').addEventListener('change', function() {
+                const isChecked = this.checked;
+                document.querySelectorAll('.result-checkbox').forEach(checkbox => {
+                    checkbox.checked = isChecked;
+                });
+            });
+        }
+        
+        // Funzione per importare i risultati del web scraping
+        function importScrapingResults() {
+            const resultsContainer = document.getElementById('scraping-results-content');
+            const checkboxes = resultsContainer.querySelectorAll('.result-checkbox:checked');
+            
+            if (checkboxes.length === 0) {
+                alert('Seleziona almeno un risultato da importare.');
+                return;
+            }
+            
+            // Ottieni i risultati selezionati
+            const location = document.getElementById('scraping-location').value;
+            const sector = document.getElementById('scraping-sector').value;
+            const size = document.getElementById('scraping-size').value;
+            const count = parseInt(document.getElementById('scraping-count').value);
+            
+            const allResults = simulateScrapingResults(location, sector, size, count);
+            const selectedResults = [];
+            
+            checkboxes.forEach(checkbox => {
+                const index = parseInt(checkbox.dataset.index);
+                if (allResults[index]) {
+                    selectedResults.push(allResults[index]);
+                }
+            });
+            
+            // Aggiungi i risultati selezionati all'array dei contatti
+            contacts.push(...selectedResults);
+            
+            // Salva i contatti
+            saveContacts();
+            
+            // Aggiorna la tabella
+            if (dataTable) {
+                try {
+                    dataTable.destroy();
+                } catch (e) {
+                    console.warn('Errore nel distruggere DataTable:', e);
+                }
+            }
+            renderContacts();
+            
+            // Chiudi il modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('scraping-modal'));
+            modal.hide();
+            
+            // Mostra un messaggio di successo
+            alert(`${selectedResults.length} aziende importate con successo!`);
+        }
+        
+        // Funzione per arricchire i dati dell'azienda
+        function enrichCompanyData(contactId) {
+            const contact = contacts[contactId];
+            if (!contact) return;
+            
+            const loadingEl = document.getElementById('enrichment-loading');
+            const contentEl = document.getElementById('enrichment-content');
+            
+            loadingEl.style.display = 'block';
+            contentEl.style.display = 'none';
+            
+            // Simula una chiamata API per ottenere dati aggiuntivi
+            setTimeout(() => {
+                // In un'app reale, qui faresti una chiamata API a un servizio come Clearbit, FullContact, ecc.
+                // Per questa demo, generiamo dati simulati
+                
+                const enrichedData = generateEnrichedData(contact);
+                
+                // Salva i dati arricchiti nel contatto
+                contact.enrichedData = enrichedData;
+                saveContacts();
+                
+                // Visualizza i dati arricchiti
+                displayEnrichedData(enrichedData);
+                
+                // Visualizza la mappa
+                if (enrichedData.coordinates) {
+                    initMap(enrichedData.coordinates.lat, enrichedData.coordinates.lng, contact['Ragione Sociale']);
+                }
+                
+                loadingEl.style.display = 'none';
+                contentEl.style.display = 'block';
+                
+            }, 1500); // Simula un ritardo di rete
+        }
+        
+        // Funzione per generare dati arricchiti simulati
+        function generateEnrichedData(contact) {
+            // In un'app reale, questi dati verrebbero da un'API
+            const companyName = contact['Ragione Sociale'];
+            const sector = contact['Settore'] || 'business';
+            
+            const sectors = {
+                'Tecnologia': {
+                    description: 'Azienda specializzata nello sviluppo di soluzioni tecnologiche innovative.',
+                    employees: Math.floor(Math.random() * 200) + 10,
+                    founded: 2000 + Math.floor(Math.random() * 20),
+                    revenue: (Math.random() * 10).toFixed(1) + 'M €',
+                    coordinates: { lat: 45.4642 + (Math.random() - 0.5) * 0.1, lng: 9.1900 + (Math.random() - 0.5) * 0.1 }
+                },
+                'Manifatturiero': {
+                    description: 'Azienda manifatturiera con focus sulla produzione di componenti di alta qualità.',
+                    employees: Math.floor(Math.random() * 500) + 50,
+                    founded: 1980 + Math.floor(Math.random() * 30),
+                    revenue: (Math.random() * 50).toFixed(1) + 'M €',
+                    coordinates: { lat: 45.4642 + (Math.random() - 0.5) * 0.1, lng: 9.1900 + (Math.random() - 0.5) * 0.1 }
+                },
+                'Servizi': {
+                    description: 'Fornitore di servizi professionali per aziende e privati.',
+                    employees: Math.floor(Math.random() * 100) + 5,
+                    founded: 1990 + Math.floor(Math.random() * 25),
+                    revenue: (Math.random() * 5).toFixed(1) + 'M €',
+                    coordinates: { lat: 45.4642 + (Math.random() - 0.5) * 0.1, lng: 9.1900 + (Math.random() - 0.5) * 0.1 }
+                },
+                'Commercio': {
+                    description: 'Azienda commerciale con una vasta rete di distribuzione in Italia.',
+                    employees: Math.floor(Math.random() * 150) + 10,
+                    founded: 1985 + Math.floor(Math.random() * 30),
+                    revenue: (Math.random() * 20).toFixed(1) + 'M €',
+                    coordinates: { lat: 45.4642 + (Math.random() - 0.5) * 0.1, lng: 9.1900 + (Math.random() - 0.5) * 0.1 }
+                }
+            };
+            
+            const defaultData = {
+                description: 'Piccola media impresa italiana operante nel suo settore di riferimento.',
+                employees: Math.floor(Math.random() * 50) + 5,
+                founded: 1990 + Math.floor(Math.random() * 30),
+                revenue: (Math.random() * 2).toFixed(1) + 'M €',
+                coordinates: { lat: 45.4642 + (Math.random() - 0.5) * 0.1, lng: 9.1900 + (Math.random() - 0.5) * 0.1 }
+            };
+            
+            // Usa i dati specifici del settore se disponibili, altrimenti usa i dati di default
+            return sectors[contact['Settore']] || defaultData;
+        }
+        
+        // Funzione per visualizzare i dati arricchiti
+        function displayEnrichedData(data) {
+            const contentEl = document.getElementById('enrichment-content');
+            
+            contentEl.innerHTML = `
+                <div class="row">
+                    <div class="col-md-12">
+                        <p><strong>Descrizione:</strong> ${data.description}</p>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <p><strong>Dipendenti:</strong> ${data.employees}</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p><strong>Anno Fondazione:</strong> ${data.founded}</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p><strong>Fatturato Stimato:</strong> ${data.revenue}</p>
+                            </div>
+                        </div>
+                        <p class="company-data-source">Dati forniti da API di arricchimento (simulazione)</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Funzione per inizializzare la mappa
+        function initMap(lat, lng, companyName) {
+            const mapContainer = document.getElementById('map-container');
+            
+            // Controlla se la mappa è già inizializzata
+            if (mapContainer._leaflet_id) {
+                // Rimuovi la mappa esistente
+                mapContainer._leaflet = null;
+                mapContainer.innerHTML = '';
+            }
+            
+            // Inizializza la mappa
+            const map = L.map('map-container').setView([lat, lng], 13);
+            
+            // Aggiungi il layer della mappa
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Aggiungi il marker
+            L.marker([lat, lng]).addTo(map)
+                .bindPopup(companyName)
+                .openPopup();
+        }
+        
+        // Funzione per cercare notizie sull'azienda
+        function fetchCompanyNews(contactId) {
+            const contact = contacts[contactId];
+            if (!contact) return;
+            
+            const loadingEl = document.getElementById('news-loading');
+            const contentEl = document.getElementById('news-content');
+            
+            loadingEl.style.display = 'block';
+            contentEl.style.display = 'none';
+            
+            // Simula una chiamata API per ottenere notizie
+            setTimeout(() => {
+                // In un'app reale, qui faresti una chiamata API a un servizio come NewsAPI, Bing News, ecc.
+                // Per questa demo, generiamo notizie simulate
+                
+                const news = generateNewsData(contact);
+                
+                // Salva le notizie nel contatto
+                contact.news = news;
+                saveContacts();
+                
+                // Visualizza le notizie
+                displayNewsData(news);
+                
+                loadingEl.style.display = 'none';
+                contentEl.style.display = 'block';
+                
+            }, 1500); // Simula un ritardo di rete
+        }
+        
+        // Funzione per generare notizie simulate
+        function generateNewsData(contact) {
+            // In un'app reale, questi dati verrebbero da un'API
+            const companyName = contact['Ragione Sociale'];
+            const sector = contact['Settore'] || 'business';
+            
+            const newsTitles = [
+                `${sector}: crescita del mercato prevista per il prossimo trimestre`,
+                `Nuove opportunità per le PMI nel settore ${sector.toLowerCase()}`,
+                `${companyName} potrebbe beneficiare dei nuovi incentivi governativi`,
+                `Analisi di mercato: le prospettive per il settore ${sector.toLowerCase()}`,
+                `Innovazione nel ${sector.toLowerCase()}: le tendenze da seguire`,
+                `Le PMI italiane del ${sector.toLowerCase()} alla conquista dei mercati esteri`
+            ];
+            
+            const newsSources = ['Il Sole 24 Ore', 'Repubblica Economia', 'Milano Finanza', 'Corriere Economia', 'ANSA Economia'];
+            
+            const news = [];
+            const now = new Date();
+            
+            // Genera 3-6 notizie casuali
+            const numNews = Math.floor(Math.random() * 4) + 3;
+            
+            for (let i = 0; i < numNews; i++) {
+                const randomDate = new Date(now);
+                randomDate.setDate(now.getDate() - Math.floor(Math.random() * 30)); // Notizie degli ultimi 30 giorni
+                
+                news.push({
+                    title: newsTitles[Math.floor(Math.random() * newsTitles.length)],
+                    date: randomDate.toISOString(),
+                    source: newsSources[Math.floor(Math.random() * newsSources.length)],
+                    url: '#'
+                });
+            }
+            
+            // Ordina le notizie per data (più recenti prima)
+            news.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            return news;
+        }
+        
+        // Funzione per visualizzare le notizie
+        function displayNewsData(news) {
+            const contentEl = document.getElementById('news-content');
+            
+            if (!news || news.length === 0) {
+                contentEl.innerHTML = '<p class="text-muted text-center">Nessuna notizia trovata.</p>';
+                return;
+            }
+            
+            let newsHTML = '<div class="list-group">';
+            
+            news.forEach(item => {
+                const date = new Date(item.date);
+                const formattedDate = date.toLocaleDateString('it-IT');
+                
+                newsHTML += `
+                    <div class="news-item">
+                        <div class="news-date">${formattedDate}</div>
+                        <div class="news-title">${item.title}</div>
+                        <div class="news-source">Fonte: ${item.source}</div>
+                    </div>
+                `;
+            });
+            
+            newsHTML += '</div><p class="company-data-source mt-3">Dati forniti da API di notizie (simulazione)</p>';
+            
+            contentEl.innerHTML = newsHTML;
+        }
+        
+        // Funzione per inizializzare la tabella delle campagne social
+        function initSocialCampaignsTable() {
+            const table = $('#social-campaigns-table').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.1/i18n/it-IT.json'
+                },
+                responsive: true,
+                columns: [
+                    { data: 'name' },
+                    { data: 'platform' },
+                    { data: 'target' },
+                    { data: 'budget', render: function(data) { return '€ ' + data; } },
+                    { data: 'status', render: function(data) {
+                        let badgeClass = '';
+                        switch(data) {
+                            case 'Pianificata':
+                                badgeClass = 'bg-info';
+                                break;
+                            case 'Attiva':
+                                badgeClass = 'bg-success';
+                                break;
+                            case 'Completata':
+                                badgeClass = 'bg-secondary';
+                                break;
+                            case 'In pausa':
+                                badgeClass = 'bg-warning';
+                                break;
+                            default:
+                                badgeClass = 'bg-light text-dark';
+                        }
+                        return '<span class="badge ' + badgeClass + '">' + data + '</span>';
+                    } },
+                    { data: 'startDate' },
+                    { data: 'endDate' },
+                    { data: null, defaultContent: '<button class="btn btn-sm btn-info me-1 btn-edit-campaign"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-danger btn-delete-campaign"><i class="fas fa-trash"></i></button>' }
+                ]
+            });
+            
+            // Gestione del click sul pulsante di modifica
+            $('#social-campaigns-table').on('click', '.btn-edit-campaign', function() {
+                const data = table.row($(this).parents('tr')).data();
+                // Implementare la modifica della campagna
+                alert('Modifica campagna: ' + data.name);
+            });
+            
+            // Gestione del click sul pulsante di eliminazione
+            $('#social-campaigns-table').on('click', '.btn-delete-campaign', function() {
+                const data = table.row($(this).parents('tr')).data();
+                if (confirm('Sei sicuro di voler eliminare la campagna "' + data.name + '"?')) {
+                    // Implementare l'eliminazione della campagna
+                    const index = socialCampaigns.findIndex(campaign => campaign.id === data.id);
+                    if (index !== -1) {
+                        socialCampaigns.splice(index, 1);
+                        saveSocialCampaigns();
+                        updateSocialCampaignsTable();
+                    }
+                }
+            });
+            
+            return table;
+        }
+        
+        // Funzione per aggiornare la tabella delle campagne social
+        function updateSocialCampaignsTable() {
+            const table = $('#social-campaigns-table').DataTable();
+            table.clear();
+            table.rows.add(socialCampaigns);
+            table.draw();
+        }
+        
+        // Funzione per salvare le campagne social nel localStorage
+        function saveSocialCampaigns() {
+            localStorage.setItem('socialCampaigns', JSON.stringify(socialCampaigns));
+        }
+        
+        // Funzione per caricare le campagne social dal localStorage
+        function loadSocialCampaigns() {
+            const savedCampaigns = localStorage.getItem('socialCampaigns');
+            if (savedCampaigns) {
+                socialCampaigns = JSON.parse(savedCampaigns);
+            } else {
+                // Campagne di esempio
+                socialCampaigns = [
+                    {
+                        id: 1,
+                        name: 'Campagna Instagram PMI Tech',
+                        platform: 'Instagram',
+                        target: 'Filtro personalizzato',
+                        budget: 500,
+                        status: 'Attiva',
+                        startDate: '2025-04-01',
+                        endDate: '2025-04-30',
+                        description: 'Campagna per aumentare la visibilità delle PMI del settore tecnologico',
+                        objectives: ['awareness', 'engagement']
+                    },
+                    {
+                        id: 2,
+                        name: 'Promozione TikTok Artigiani',
+                        platform: 'TikTok',
+                        target: 'Filtro personalizzato',
+                        budget: 300,
+                        status: 'Pianificata',
+                        startDate: '2025-04-15',
+                        endDate: '2025-05-15',
+                        description: 'Campagna per promuovere artigiani locali con video dimostrativi',
+                        objectives: ['awareness', 'engagement', 'leads']
+                    },
+                    {
+                        id: 3,
+                        name: 'LinkedIn B2B Milano',
+                        platform: 'LinkedIn',
+                        target: 'Filtro personalizzato',
+                        budget: 800,
+                        status: 'Attiva',
+                        startDate: '2025-03-15',
+                        endDate: '2025-04-15',
+                        description: 'Campagna B2B per aziende di Milano',
+                        objectives: ['leads', 'sales']
+                    }
+                ];
+                saveSocialCampaigns();
+            }
+        }
+        
+        // Gestione del form per la creazione di una nuova campagna social
+        function setupSocialCampaignForm() {
+            // Mostra/nascondi i filtri in base al target selezionato
+            $('#campaign-target').on('change', function() {
+                if ($(this).val() === 'Filtro personalizzato') {
+                    $('#target-filter-container').show();
+                } else {
+                    $('#target-filter-container').hide();
+                }
+            });
+            
+            // Popola i filtri con i dati disponibili
+            function populateCampaignFilters() {
+                // Popola il filtro dei settori
+                const sectorFilter = document.getElementById('filter-campaign-sector');
+                const sectors = [...new Set(contacts.map(contact => contact['Settore']))].filter(Boolean).sort();
+                
+                sectorFilter.innerHTML = '<option value="">Tutti i settori</option>';
+                sectors.forEach(sector => {
+                    sectorFilter.innerHTML += `<option value="${sector}">${sector}</option>`;
+                });
+                
+                // Popola il filtro delle province
+                const provinceFilter = document.getElementById('filter-campaign-province');
+                const provinces = new Set();
+                
+                contacts.forEach(contact => {
+                    if (contact['Indirizzo']) {
+                        const addressParts = contact['Indirizzo'].split(' - ');
+                        if (addressParts.length > 1) {
+                            const locationParts = addressParts[1].split(' ');
+                            if (locationParts.length > 1) {
+                                const city = locationParts.slice(1).join(' ');
+                                provinces.add(city);
+                            }
+                        }
+                    }
+                });
+                
+                provinceFilter.innerHTML = '<option value="">Tutte le province</option>';
+                [...provinces].sort().forEach(province => {
+                    provinceFilter.innerHTML += `<option value="${province}">${province}</option>`;
+                });
+            }
+            
+            // Imposta la data di inizio al giorno corrente
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('campaign-start-date').value = today;
+            
+            // Imposta la data di fine a un mese dopo
+            const nextMonth = new Date();
+            nextMonth.setMonth(nextMonth.getMonth() + 1);
+            document.getElementById('campaign-end-date').value = nextMonth.toISOString().split('T')[0];
+            
+            // Gestione del salvataggio della campagna
+            document.getElementById('save-social-campaign').addEventListener('click', function() {
+                const form = document.getElementById('social-campaign-form');
+                
+                // Verifica che il form sia valido
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+                
+                // Raccogli i dati dal form
+                const name = document.getElementById('campaign-name').value;
+                const platform = document.getElementById('campaign-platform').value;
+                const target = document.getElementById('campaign-target').value;
+                const budget = document.getElementById('campaign-budget').value;
+                const startDate = document.getElementById('campaign-start-date').value;
+                const endDate = document.getElementById('campaign-end-date').value;
+                const description = document.getElementById('campaign-description').value;
+                
+                // Raccogli gli obiettivi selezionati
+                const objectives = [];
+                if (document.getElementById('objective-awareness').checked) objectives.push('awareness');
+                if (document.getElementById('objective-engagement').checked) objectives.push('engagement');
+                if (document.getElementById('objective-leads').checked) objectives.push('leads');
+                if (document.getElementById('objective-sales').checked) objectives.push('sales');
+                
+                // Crea l'oggetto campagna
+                const campaign = {
+                    id: Date.now(), // ID univoco basato sul timestamp
+                    name,
+                    platform,
+                    target,
+                    budget: parseInt(budget),
+                    status: 'Pianificata',
+                    startDate,
+                    endDate,
+                    description,
+                    objectives
+                };
+                
+                // Se è stato selezionato il filtro personalizzato, aggiungi i filtri
+                if (target === 'Filtro personalizzato') {
+                    campaign.filters = {
+                        sector: document.getElementById('filter-campaign-sector').value,
+                        province: document.getElementById('filter-campaign-province').value,
+                        size: document.getElementById('filter-campaign-size').value
+                    };
+                }
+                
+                // Aggiungi la campagna all'array e salva
+                socialCampaigns.push(campaign);
+                saveSocialCampaigns();
+                
+                // Aggiorna la tabella
+                updateSocialCampaignsTable();
+                
+                // Chiude il modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('socialCampaignModal'));
+                modal.hide();
+                
+                // Reset del form
+                form.reset();
+                document.getElementById('campaign-start-date').value = today;
+                document.getElementById('campaign-end-date').value = nextMonth.toISOString().split('T')[0];
+                document.getElementById('target-filter-container').style.display = 'none';
+                
+                // Mostra un messaggio di successo
+                alert('Campagna creata con successo!');
+            });
+            
+            // Popola i filtri quando il modal viene aperto
+            $('#socialCampaignModal').on('show.bs.modal', function() {
+                populateCampaignFilters();
+            });
+        }
+    </script>
+</body>
+</html>
